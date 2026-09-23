@@ -8,10 +8,16 @@ export default function ConfirmDialog({ isOpen, title, message, onConfirm, onCan
   if (!isOpen) return null;
 
   return (
-    <div className="confirm-overlay" onClick={onCancel}>
-      <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
-        <div className="confirm-dialog__icon">⚠</div>
-        <h3 className="confirm-dialog__title">{title || 'Confirm Action'}</h3>
+    <div className="confirm-overlay" onClick={onCancel} role="presentation">
+      <div
+        className="confirm-dialog"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-dialog-title"
+      >
+        <div className="confirm-dialog__icon" aria-hidden="true">⚠</div>
+        <h3 className="confirm-dialog__title" id="confirm-dialog-title">{title || 'Confirm Action'}</h3>
         <p className="confirm-dialog__message">
           {message || 'Are you sure you want to proceed?'}
         </p>

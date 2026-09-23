@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './TaskCard.css';
 
@@ -18,7 +19,7 @@ const PRIORITY_CONFIG = {
   high: { label: 'High', className: 'priority--high' },
 };
 
-export default function TaskCard({ task, onDelete, isOptimistic }) {
+function TaskCard({ task, onDelete, isOptimistic }) {
   const navigate = useNavigate();
   const status = STATUS_CONFIG[task.status] || STATUS_CONFIG.pending;
   const priority = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.medium;
@@ -47,7 +48,7 @@ export default function TaskCard({ task, onDelete, isOptimistic }) {
         </div>
       </div>
 
-      <h3 className="task-card__title">{task.title}</h3>
+      <h2 className="task-card__title">{task.title}</h2>
       <p className="task-card__description">{task.description}</p>
 
       <div className="task-card__footer">
@@ -68,6 +69,7 @@ export default function TaskCard({ task, onDelete, isOptimistic }) {
               className="task-card__btn task-card__btn--edit"
               onClick={() => navigate(`/edit/${task._id}`)}
               title="Edit task"
+              aria-label={`Edit task: ${task.title}`}
               id={`edit-btn-${task._id}`}
             >
               ✏️
@@ -76,6 +78,7 @@ export default function TaskCard({ task, onDelete, isOptimistic }) {
               className="task-card__btn task-card__btn--delete"
               onClick={() => onDelete(task._id, task.title)}
               title="Delete task"
+              aria-label={`Delete task: ${task.title}`}
               id={`delete-btn-${task._id}`}
             >
               🗑️
@@ -86,3 +89,5 @@ export default function TaskCard({ task, onDelete, isOptimistic }) {
     </div>
   );
 }
+
+export default memo(TaskCard);

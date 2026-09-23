@@ -8,6 +8,7 @@ const contentTypeMiddleware = require('./src/middleware/contentType');
 const notFoundHandler = require('./src/middleware/notFound');
 const errorHandler = require('./src/middleware/errorHandler');
 const taskRoutes = require('./src/routes/taskRoutes');
+const debugRoutes = require('./src/routes/debugRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -33,8 +34,9 @@ app.use(loggerMiddleware);
 // 4. Content-Type Validation Middleware
 app.use(contentTypeMiddleware);
 
-// 5. Mount Task REST API Routes
+// 5. Mount REST API Routes
 app.use('/tasks', taskRoutes);
+app.use('/debug', debugRoutes);
 
 // 6. 404 Handler for undefined routes
 app.use(notFoundHandler);

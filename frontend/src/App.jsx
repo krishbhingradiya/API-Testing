@@ -1,9 +1,17 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { ToastProvider } from './context/ToastContext';
 import ToastContainer from './components/Toast';
 import TaskList from './components/TaskList';
-import TaskForm from './components/TaskForm';
 import './index.css';
+
+const TaskForm = lazy(() => import('./components/TaskForm'));
+
+const RouteFallback = () => (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+    <div className="spinner" style={{ width: '32px', height: '32px', borderColor: 'rgba(99, 102, 241, 0.2)', borderTopColor: 'var(--color-primary)' }} />
+  </div>
+);
 
 /**
  * Navbar — Top navigation bar with app branding and current page indicator.
@@ -56,11 +64,13 @@ function App() {
         <div className="app">
           <Navbar />
           <main className="app__main">
-            <Routes>
-              <Route path="/" element={<TaskList />} />
-              <Route path="/create" element={<TaskForm />} />
-              <Route path="/edit/:id" element={<TaskForm />} />
-            </Routes>
+            <Suspense fallback={<RouteFallback />}>
+              <Routes>
+                <Route path="/" element={<TaskList />} />
+                <Route path="/create" element={<TaskForm />} />
+                <Route path="/edit/:id" element={<TaskForm />} />
+              </Routes>
+            </Suspense>
           </main>
           <ToastContainer />
         </div>

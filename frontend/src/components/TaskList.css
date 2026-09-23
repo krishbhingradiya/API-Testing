@@ -4,6 +4,24 @@
   margin: 0 auto;
 }
 
+/* Header */
+.task-list__header {
+  margin-bottom: 1.25rem;
+}
+
+.task-list__title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  margin-bottom: 0.25rem;
+}
+
+.task-list__subtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
 /* Toolbar */
 .task-toolbar {
   display: flex;
@@ -174,6 +192,7 @@
   margin-bottom: 1rem;
 }
 
+.task-list__error h2,
 .task-list__error h3 {
   font-size: 1.25rem;
   color: #fca5a5;
@@ -200,6 +219,7 @@
   margin-bottom: 1rem;
 }
 
+.task-list__empty h2,
 .task-list__empty h3 {
   font-size: 1.25rem;
   color: var(--color-text);

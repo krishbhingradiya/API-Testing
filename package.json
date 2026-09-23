@@ -21,7 +21,8 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^4.21.2",
-    "mongoose": "^9.9.1"
+    "mongoose": "^9.9.1",
+    "node-cache": "^5.1.2"
   },
   "devDependencies": {
     "mongodb-memory-server": "^11.2.0"

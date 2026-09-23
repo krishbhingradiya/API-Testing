@@ -3,6 +3,7 @@ const router = express.Router();
 const Task = require('../models/Task');
 const validateTaskId = require('../middleware/idValidator');
 const { addLinksToTask, generateCollectionLinks } = require('../utils/taskLinks');
+const cache = require('../utils/cache');
 
 /**
  * @route   GET /tasks
@@ -11,6 +12,18 @@ const { addLinksToTask, generateCollectionLinks } = require('../utils/taskLinks'
  */
 router.get('/', async (req, res, next) => {
   try {
+    const isDefaultQuery = Object.keys(req.query).length === 0;
+
+    // 1. Practical 9: Check in-memory cache for all_tasks
+    if (isDefaultQuery) {
+      const cachedResponse = cache.get('all_tasks');
+      if (cachedResponse) {
+        cache.recordHit();
+        return res.status(200).json(cachedResponse);
+      }
+      cache.recordMiss();
+    }
+
     const filter = {};
 
     // Status filter (enum: pending, in-progress, completed)
@@ -47,7 +60,7 @@ router.get('/', async (req, res, next) => {
     // Generate collection-level HATEOAS pagination links
     const collectionLinks = generateCollectionLinks(req, page, limit, totalPages);
 
-    res.status(200).json({
+    const responsePayload = {
       success: true,
       count: tasksWithLinks.length,
       totalCount,
@@ -55,7 +68,14 @@ router.get('/', async (req, res, next) => {
       totalPages,
       data: tasksWithLinks,
       _links: collectionLinks
-    });
+    };
+
+    // Store in cache for default GET /tasks
+    if (isDefaultQuery) {
+      cache.set('all_tasks', responsePayload);
+    }
+
+    res.status(200).json(responsePayload);
   } catch (err) {
     next(err);
   }
@@ -76,11 +96,21 @@ router.get('/test-error', (req, res, next) => {
 
 /**
  * @route   GET /tasks/:id
- * @desc    Get single task by ObjectId with HATEOAS links
+ * @desc    Get single task by ObjectId with HATEOAS links and Practical 9 in-memory caching
  * @status  200 OK or 404 Not Found
  */
 router.get('/:id', validateTaskId, async (req, res, next) => {
   try {
+    const cacheKey = `task_${req.params.id}`;
+    const cachedTask = cache.get(cacheKey);
+
+    // Practical 9: Check in-memory cache for individual task
+    if (cachedTask) {
+      cache.recordHit();
+      return res.status(200).json(cachedTask);
+    }
+    cache.recordMiss();
+
     const task = await Task.findById(req.params.id);
 
     if (!task) {
@@ -91,12 +121,16 @@ router.get('/:id', validateTaskId, async (req, res, next) => {
     }
 
     const taskWithLinks = addLinksToTask(task);
-
-    res.status(200).json({
+    const responsePayload = {
       success: true,
       data: taskWithLinks,
       _links: taskWithLinks._links
-    });
+    };
+
+    // Store individual task in cache
+    cache.set(cacheKey, responsePayload);
+
+    res.status(200).json(responsePayload);
   } catch (err) {
     next(err);
   }
@@ -121,6 +155,10 @@ router.post('/', async (req, res, next) => {
     });
 
     const savedTask = await newTask.save();
+
+    // Practical 9: Invalidate all_tasks cache after successful DB creation
+    cache.del('all_tasks');
+
     const taskWithLinks = addLinksToTask(savedTask);
 
     res.status(201).json({
@@ -159,6 +197,10 @@ router.put('/:id', validateTaskId, async (req, res, next) => {
         error: `Task with ID ${req.params.id} not found`
       });
     }
+
+    // Practical 9: Invalidate both all_tasks and individual task caches after successful DB update
+    cache.del('all_tasks');
+    cache.del(`task_${req.params.id}`);
 
     const taskWithLinks = addLinksToTask(updatedTask);
 
@@ -199,6 +241,10 @@ router.patch('/:id', validateTaskId, async (req, res, next) => {
       });
     }
 
+    // Practical 9: Invalidate both all_tasks and individual task caches after successful DB partial update
+    cache.del('all_tasks');
+    cache.del(`task_${req.params.id}`);
+
     const taskWithLinks = addLinksToTask(updatedTask);
 
     res.status(200).json({
@@ -227,6 +273,10 @@ router.delete('/:id', validateTaskId, async (req, res, next) => {
         error: `Task with ID ${req.params.id} not found`
       });
     }
+
+    // Practical 9: Invalidate both all_tasks and individual task caches after successful DB deletion
+    cache.del('all_tasks');
+    cache.del(`task_${req.params.id}`);
 
     res.status(200).json({
       success: true,

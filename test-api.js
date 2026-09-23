@@ -410,12 +410,178 @@ async function runTests() {
     if (!deleteRes.body.message) throw new Error('Delete response should have a message');
   });
 
+  // Clean up the HATEOAS test task
+  await makeRequest(`/tasks/${hateoasTaskId}`, 'DELETE');
+
+  // ============================================================
+  // SECTION 3: PRACTICAL 9 CACHING & PERFORMANCE TESTS
+  // ============================================================
+  console.log('\n--- Practical 9 In-Memory Caching Tests ---\n');
+
+  // Cache Test 1: GET /debug/cache returns proper structure
+  await assertTest('Cache Debug: GET /debug/cache returns 200 and valid metrics', async () => {
+    const res = await makeRequest('/debug/cache');
+    if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
+    if (!res.body.success) throw new Error('Expected success: true');
+    if (typeof res.body.hits !== 'number' || typeof res.body.misses !== 'number') {
+      throw new Error('Missing hits/misses numeric properties');
+    }
+    if (!res.body.hitRate || typeof res.body.hitRate !== 'string') {
+      throw new Error('Missing hitRate string');
+    }
+    if (res.body.ttlSeconds !== 60) {
+      throw new Error(`Expected ttlSeconds to be 60, got ${res.body.ttlSeconds}`);
+    }
+  });
+
+  // Create a clean task to test caching flow
+  let p9TaskId = null;
+  const p9Create = await makeRequest('/tasks', 'POST', {
+    title: 'Practical 9 Caching Task',
+    description: 'Testing HIT and MISS behaviors'
+  });
+  p9TaskId = p9Create.body.data._id;
+
+  // Cache Test 2: GET /tasks initial call is a MISS
+  let initialHits = 0;
+  let initialMisses = 0;
+  await assertTest('Cache GET /tasks: First request is a MISS and increments misses counter', async () => {
+    const debugBefore = await makeRequest('/debug/cache');
+    initialHits = debugBefore.body.hits;
+    initialMisses = debugBefore.body.misses;
+
+    const res = await makeRequest('/tasks');
+    if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
+
+    const debugAfter = await makeRequest('/debug/cache');
+    if (debugAfter.body.misses !== initialMisses + 1) {
+      throw new Error(`Expected misses to increase by 1, was ${initialMisses} now ${debugAfter.body.misses}`);
+    }
+  });
+
+  // Cache Test 3: GET /tasks second call is a HIT
+  await assertTest('Cache GET /tasks: Second request is a HIT and increments hits counter', async () => {
+    const debugBefore = await makeRequest('/debug/cache');
+    const hitsBefore = debugBefore.body.hits;
+
+    const res = await makeRequest('/tasks');
+    if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
+
+    const debugAfter = await makeRequest('/debug/cache');
+    if (debugAfter.body.hits !== hitsBefore + 1) {
+      throw new Error(`Expected hits to increase by 1, was ${hitsBefore} now ${debugAfter.body.hits}`);
+    }
+  });
+
+  // Cache Test 4: GET /tasks/:id first request is a MISS, second request is a HIT
+  await assertTest('Cache GET /tasks/:id: First call is MISS, second call is HIT', async () => {
+    const debug1 = await makeRequest('/debug/cache');
+    const missesBefore = debug1.body.misses;
+    const hitsBefore = debug1.body.hits;
+
+    // First call (MISS)
+    const res1 = await makeRequest(`/tasks/${p9TaskId}`);
+    if (res1.status !== 200) throw new Error(`Expected 200, got ${res1.status}`);
+
+    const debug2 = await makeRequest('/debug/cache');
+    if (debug2.body.misses !== missesBefore + 1) {
+      throw new Error('Individual task first request did not register as a MISS');
+    }
+
+    // Second call (HIT)
+    const res2 = await makeRequest(`/tasks/${p9TaskId}`);
+    if (res2.status !== 200) throw new Error(`Expected 200, got ${res2.status}`);
+
+    const debug3 = await makeRequest('/debug/cache');
+    if (debug3.body.hits !== hitsBefore + 1) {
+      throw new Error('Individual task second request did not register as a HIT');
+    }
+  });
+
+  // Cache Test 5: POST /tasks invalidates all_tasks cache
+  await assertTest('Cache Invalidation: POST /tasks invalidates all_tasks cache preventing stale data', async () => {
+    // 1. Ensure all_tasks is cached
+    await makeRequest('/tasks');
+
+    // 2. Create another task
+    const postRes = await makeRequest('/tasks', 'POST', {
+      title: 'Cache Invalidation Verification Task',
+      description: 'Verifying all_tasks cache is purged on creation'
+    });
+    const newTaskId = postRes.body.data._id;
+
+    // 3. Immediately GET /tasks — should be a MISS because cache was invalidated
+    const debugBefore = await makeRequest('/debug/cache');
+    const missesBefore = debugBefore.body.misses;
+
+    const getRes = await makeRequest('/tasks');
+    if (getRes.status !== 200) throw new Error(`Expected 200, got ${getRes.status}`);
+
+    const debugAfter = await makeRequest('/debug/cache');
+    if (debugAfter.body.misses !== missesBefore + 1) {
+      throw new Error('Expected GET /tasks after POST to be a MISS (cache invalidation failed)');
+    }
+
+    // Verify newly added task is in the fresh list
+    const found = getRes.body.data.some(t => t._id === newTaskId);
+    if (!found) throw new Error('Newly created task not found in fresh GET /tasks list');
+
+    // Cleanup
+    await makeRequest(`/tasks/${newTaskId}`, 'DELETE');
+  });
+
+  // Cache Test 6: PUT /tasks/:id invalidates both all_tasks and task_:id
+  await assertTest('Cache Invalidation: PUT /tasks/:id invalidates both all_tasks and task_<id>', async () => {
+    // 1. Cache individual task
+    await makeRequest(`/tasks/${p9TaskId}`);
+
+    // 2. Update task
+    const putRes = await makeRequest(`/tasks/${p9TaskId}`, 'PUT', {
+      title: 'Updated Practical 9 Title',
+      description: 'Updated description for cache invalidation'
+    });
+    if (putRes.status !== 200) throw new Error(`Expected 200, got ${putRes.status}`);
+
+    // 3. GET /tasks/:id should be a MISS and return updated data
+    const debugBefore = await makeRequest('/debug/cache');
+    const missesBefore = debugBefore.body.misses;
+
+    const getRes = await makeRequest(`/tasks/${p9TaskId}`);
+    if (getRes.status !== 200) throw new Error(`Expected 200, got ${getRes.status}`);
+    if (getRes.body.data.title !== 'Updated Practical 9 Title') {
+      throw new Error('Stale data returned! PUT cache invalidation failed');
+    }
+
+    const debugAfter = await makeRequest('/debug/cache');
+    if (debugAfter.body.misses !== missesBefore + 1) {
+      throw new Error('Expected GET /tasks/:id after PUT to be a MISS');
+    }
+  });
+
+  // Cache Test 7: DELETE /tasks/:id invalidates all_tasks and task_:id
+  await assertTest('Cache Invalidation: DELETE /tasks/:id purges cache so subsequent GET returns 404', async () => {
+    // Delete task
+    const delRes = await makeRequest(`/tasks/${p9TaskId}`, 'DELETE');
+    if (delRes.status !== 200) throw new Error(`Expected 200, got ${delRes.status}`);
+
+    // GET /tasks/:id should return 404 (not cached stale task)
+    const getRes = await makeRequest(`/tasks/${p9TaskId}`);
+    if (getRes.status !== 404) {
+      throw new Error(`Expected 404 for deleted task, got ${getRes.status}`);
+    }
+  });
+
+  // Cache Test 8: Final stats verification
+  await assertTest('Cache Stats: Final metrics show accurate totalRequests and hitRate', async () => {
+    const res = await makeRequest('/debug/cache');
+    if (res.body.totalRequests !== res.body.hits + res.body.misses) {
+      throw new Error('totalRequests does not match sum of hits and misses');
+    }
+  });
+
   // ============================================================
   // CLEANUP & SUMMARY
   // ============================================================
-
-  // Clean up the HATEOAS test task
-  await makeRequest(`/tasks/${hateoasTaskId}`, 'DELETE');
 
   console.log('\n----------------------------------------------------');
   console.log(`📊 Test Execution Summary: ${passed} Passed, ${failed} Failed`);

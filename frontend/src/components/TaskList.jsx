@@ -118,6 +118,12 @@ export default function TaskList() {
 
   return (
     <div className="task-list-container">
+      {/* Semantic Header */}
+      <header className="task-list__header">
+        <h1 className="task-list__title">Task Dashboard</h1>
+        <p className="task-list__subtitle">Organize, track, and manage your tasks efficiently</p>
+      </header>
+
       {/* Toolbar: Search, Filters, Create Button */}
       <div className="task-toolbar">
         <div className="task-toolbar__search">
@@ -129,6 +135,7 @@ export default function TaskList() {
             onChange={handleSearchChange}
             className="search-input"
             id="search-tasks-input"
+            aria-label="Search tasks"
           />
         </div>
 
@@ -138,6 +145,7 @@ export default function TaskList() {
             onChange={handleStatusChange}
             className="filter-select"
             id="filter-status"
+            aria-label="Filter tasks by status"
           >
             <option value="">All Statuses</option>
             <option value="pending">🟡 Pending</option>
@@ -150,6 +158,7 @@ export default function TaskList() {
             onChange={handlePriorityChange}
             className="filter-select"
             id="filter-priority"
+            aria-label="Filter tasks by priority"
           >
             <option value="">All Priorities</option>
             <option value="low">Low</option>
@@ -204,7 +213,7 @@ export default function TaskList() {
       {!loading && error && (
         <div className="task-list__error">
           <div className="error-icon">⚠️</div>
-          <h3>Something went wrong</h3>
+          <h2>Something went wrong</h2>
           <p>{error}</p>
           <button className="btn btn--primary" onClick={fetchTasks} id="retry-btn">
             ↻ Retry
@@ -216,7 +225,7 @@ export default function TaskList() {
       {!loading && !error && tasks.length === 0 && (
         <div className="task-list__empty">
           <div className="empty-icon">📋</div>
-          <h3>{hasActiveFilters ? 'No matching tasks' : 'No tasks yet'}</h3>
+          <h2>{hasActiveFilters ? 'No matching tasks' : 'No tasks yet'}</h2>
           <p>
             {hasActiveFilters
               ? 'Try adjusting your filters or search query.'
