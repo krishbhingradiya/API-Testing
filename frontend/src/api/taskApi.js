@@ -5,7 +5,7 @@
  * Every function returns structured { success, data, error } responses.
  */
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5001';
 
 /**
  * GET /tasks — Fetch all tasks with optional pagination and filters

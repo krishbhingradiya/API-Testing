@@ -3,7 +3,7 @@
  * Practical Lab — Step 2: Base Backend URL Configuration
  */
 
-export let BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+export let BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5001';
 
 export function setBaseUrl(newUrl) {
   BASE_URL = newUrl;

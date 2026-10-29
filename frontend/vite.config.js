@@ -19,6 +19,15 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 600,
   },
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    proxy: {
+      '/tasks': 'http://127.0.0.1:5001',
+      '/api': 'http://127.0.0.1:5001',
+      '/debug': 'http://127.0.0.1:5001',
+    },
+  },
   preview: {
     host: '0.0.0.0',
     port: 5173,
