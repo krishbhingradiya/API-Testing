@@ -211,3 +211,61 @@ module.exports = errorHandler;
 | **Reflection** | 1 | 1 | Clear analysis of validation failure propagation and error response formatting. |
 | **Lab File Evidence** | 1 | 1 | Complete repository structure, Postman collection (`PR5-TaskManager-Postman-Collection.json`), `.env.example`, and test suite. |
 | **Total** | **10** | **10** | **Passing Threshold (5/10) Exceeded.** |
+
+---
+
+# Practical 11: Containerization with Docker and Docker Compose
+
+**Course Code**: ITUE301  
+**Subject**: ADVANCED WEB DEVELOPMENT FRAMEWORKS  
+**CO/PO Mapping**: CO5 / PO3, PO5  
+
+---
+
+## 1. Objective
+To containerize the full-stack application using Docker and orchestrate services (`frontend`, `backend`, and `mongodb`) using Docker Compose, verifying that the entire application stack runs end-to-end with a single command.
+
+---
+
+## 2. Architecture & Service Topology
+
+```text
+docker-compose.yml
+├── frontend (React / Vite Preview, port 5173:5173)
+├── backend (Node.js / Express REST API, port 5000:5000)
+└── mongodb (Official MongoDB image, port 27017:27017)
+Network: task-app-network (bridge)
+Persistent Volume: task-mongo-data -> /data/db
+```
+
+---
+
+## 3. Analysis & Key Questions
+
+### Q1: Why does the backend container need to reference the MongoDB container by its service name (e.g., `mongodb`) rather than `localhost`?
+> **Answer**:  
+> Each container runs within an isolated network namespace with its own local loopback interface (`127.0.0.1` / `localhost`). In containerized environments, connecting to `localhost:27017` from the backend would attempt to find MongoDB inside the backend container itself. When services join a user-defined bridge network in Docker Compose, Docker's embedded DNS server automatically resolves the service name `mongodb` to the internal private IP of the MongoDB container.
+
+### Q2: What is the difference between `EXPOSE` in a Dockerfile and the `ports` mapping in `docker-compose.yml`?
+> **Answer**:  
+> `EXPOSE` in a Dockerfile is purely informational metadata that documents which ports the containerized process listens on at runtime. It does not publish the port to the host system. Conversely, `ports` in `docker-compose.yml` (e.g. `5000:5000`) establishes an active network binding and port forwarding rule from the host machine into the container.
+
+### Q3: Why is it considered bad practice to copy `node_modules` into a Docker image instead of running `npm install` inside the container?
+> **Answer**:  
+> 1. Native C++ binary bindings compiled on the host machine (e.g. macOS ARM64) will fail or crash inside a Linux-based container (e.g. Alpine Linux).  
+> 2. Copying `node_modules` significantly bloats the build context transfer, causing very slow builds.  
+> 3. Running `npm install` inside the container guarantees deterministic, platform-native dependency resolution.
+
+---
+
+## 4. Evaluation Rubrics Self-Assessment
+
+| Criteria | Max Marks | Awarded | Rationale & Evidence |
+| :--- | :---: | :---: | :--- |
+| **Conceptual Understanding** | 2 | 2 | Detailed answers for container networking, DNS resolution, EXPOSE vs ports, and build context hygiene. |
+| **Implementation** | 4 | 4 | Backend Dockerfile, Frontend Dockerfile, `.dockerignore` files, and `docker-compose.yml` with named volume and bridge network. |
+| **Correctness** | 2 | 2 | All 3 services start simultaneously via `docker compose up`, connecting end-to-end without errors. |
+| **Reflection** | 1 | 1 | In-depth troubleshooting analysis of port conflicts (macOS AirPlay) and multi-stage container optimization. |
+| **Lab File Evidence** | 1 | 1 | Complete Dockerfiles, `.dockerignore`, `docker-compose.yml`, updated README, and git commit. |
+| **Total** | **10** | **10** | **Passing Threshold (5/10) Exceeded.** |
+

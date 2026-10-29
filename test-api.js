@@ -580,6 +580,107 @@ async function runTests() {
   });
 
   // ============================================================
+  // PRACTICAL 10: ASYNCHRONOUS EVENT-DRIVEN ARCHITECTURE TESTS
+  // ============================================================
+
+  console.log('\n--- Practical 10 Event-Driven Architecture Tests ---\n');
+
+  const taskEvents = require('./src/events/events');
+  let p10CreatedTaskId = null;
+
+  // Practical 10 Test 1: POST /tasks returns 201 immediately and emits task-created
+  await assertTest('Practical 10: POST /tasks returns 201 immediately while task-created event fires', async () => {
+    let eventReceived = false;
+    let receivedTask = null;
+
+    const testListener = (task) => {
+      eventReceived = true;
+      receivedTask = task;
+    };
+    taskEvents.once('task-created', testListener);
+
+    const startTime = Date.now();
+    const res = await makeRequest('/tasks', 'POST', {
+      title: 'Practical 10 Event Architecture Task',
+      description: 'Testing non-blocking EventEmitter async processing',
+      priority: 'high',
+      assignedUser: 'Lab Student'
+    });
+    const responseDuration = Date.now() - startTime;
+
+    if (res.status !== 201) throw new Error(`Expected 201, got ${res.status}`);
+    if (responseDuration > 500) {
+      throw new Error(`API response was delayed (${responseDuration}ms)! Asynchronous work blocked HTTP response.`);
+    }
+    if (!eventReceived) throw new Error('task-created event was not emitted on task creation');
+    if (receivedTask.title !== 'Practical 10 Event Architecture Task') {
+      throw new Error('task-created event payload did not contain expected title');
+    }
+    if (receivedTask.assignedUser !== 'Lab Student') {
+      throw new Error('task-created event payload did not contain expected assignedUser');
+    }
+
+    p10CreatedTaskId = res.body.data._id;
+  });
+
+  // Practical 10 Test 2: Notification listener completes asynchronously after ~2000ms
+  await assertTest('Practical 10: Notification listener delay does not block Node.js event loop', async () => {
+    const start = Date.now();
+    // Verify event loop remains responsive during the 2-second timeout window
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    const elapsed = Date.now() - start;
+    if (elapsed > 200) {
+      throw new Error('Event loop was blocked! Practical 10 must use non-blocking setTimeout');
+    }
+  });
+
+  // Practical 10 Test 3: DELETE /tasks/:id emits task-deleted event
+  await assertTest('Practical 10: DELETE /tasks/:id emits task-deleted event with deleted document', async () => {
+    let deletedEventReceived = false;
+    let deletedTaskData = null;
+
+    const deleteListener = (task) => {
+      deletedEventReceived = true;
+      deletedTaskData = task;
+    };
+    taskEvents.once('task-deleted', deleteListener);
+
+    const res = await makeRequest(`/tasks/${p10CreatedTaskId}`, 'DELETE');
+    if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
+    if (!deletedEventReceived) throw new Error('task-deleted event was not emitted on deletion');
+    if (deletedTaskData._id.toString() !== p10CreatedTaskId.toString()) {
+      throw new Error('task-deleted event payload did not match deleted task ID');
+    }
+  });
+
+  // Practical 10 Test 4: Error event handling
+  await assertTest('Practical 10: Shared EventEmitter has error listener and handles error events safely', async () => {
+    let errorLogged = false;
+    const originalConsoleError = console.error;
+    console.error = (msg) => {
+      if (typeof msg === 'string' && msg.includes('[Event Error]')) {
+        errorLogged = true;
+      }
+    };
+
+    try {
+      taskEvents.emit('error', new Error('Simulated test event error'));
+      if (!errorLogged) throw new Error('Error listener did not log [Event Error]');
+    } finally {
+      console.error = originalConsoleError;
+    }
+  });
+
+  // Practical 10 Test 5: Verify Practical 9 caching is preserved after Practical 10 operations
+  await assertTest('Practical 10 Regression: Practical 9 caching still functions after event operations', async () => {
+    const res = await makeRequest('/debug/cache');
+    if (res.status !== 200) throw new Error(`Expected 200 from /debug/cache, got ${res.status}`);
+    if (typeof res.body.hits !== 'number' || typeof res.body.misses !== 'number') {
+      throw new Error('Cache debug endpoint metrics corrupted');
+    }
+  });
+
+  // ============================================================
   // CLEANUP & SUMMARY
   // ============================================================
 

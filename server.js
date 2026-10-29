@@ -10,6 +10,9 @@ const errorHandler = require('./src/middleware/errorHandler');
 const taskRoutes = require('./src/routes/taskRoutes');
 const debugRoutes = require('./src/routes/debugRoutes');
 
+// Practical 10: Register EventEmitter listeners once during application startup
+require('./src/events/listeners');
+
 const app = express();
 const PORT = process.env.PORT || 5001;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/taskdb';

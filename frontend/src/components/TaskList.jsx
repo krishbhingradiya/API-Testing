@@ -293,6 +293,7 @@ export default function TaskList() {
             ? `Are you sure you want to delete "${deleteTarget.title}"? This action cannot be undone.`
             : ''
         }
+        isLoading={deleting}
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
       />

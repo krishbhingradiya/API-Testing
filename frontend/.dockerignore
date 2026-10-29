@@ -1,0 +1,10 @@
+# Docker ignore file for frontend build context
+# Excludes local node_modules, build outputs, and environment variables
+node_modules
+npm-debug.log
+.env
+.env.*
+dist
+build
+.git
+.gitignore

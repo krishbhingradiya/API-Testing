@@ -38,6 +38,11 @@ const taskSchema = new mongoose.Schema({
   },
   dueDate: {
     type: Date
+  },
+  assignedUser: {
+    type: String,
+    trim: true,
+    default: 'Unassigned'
   }
 }, {
   timestamps: true

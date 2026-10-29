@@ -4,11 +4,11 @@ import './ConfirmDialog.css';
  * ConfirmDialog — Modal overlay for confirming destructive actions (e.g., delete).
  * Renders on top of everything with a blurred backdrop.
  */
-export default function ConfirmDialog({ isOpen, title, message, onConfirm, onCancel }) {
+export default function ConfirmDialog({ isOpen, title, message, onConfirm, onCancel, isLoading = false }) {
   if (!isOpen) return null;
 
   return (
-    <div className="confirm-overlay" onClick={onCancel} role="presentation">
+    <div className="confirm-overlay" onClick={isLoading ? undefined : onCancel} role="presentation">
       <div
         className="confirm-dialog"
         onClick={(e) => e.stopPropagation()}
@@ -25,6 +25,7 @@ export default function ConfirmDialog({ isOpen, title, message, onConfirm, onCan
           <button
             className="confirm-dialog__btn confirm-dialog__btn--cancel"
             onClick={onCancel}
+            disabled={isLoading}
             id="confirm-cancel-btn"
           >
             Cancel
@@ -32,9 +33,10 @@ export default function ConfirmDialog({ isOpen, title, message, onConfirm, onCan
           <button
             className="confirm-dialog__btn confirm-dialog__btn--confirm"
             onClick={onConfirm}
+            disabled={isLoading}
             id="confirm-delete-btn"
           >
-            Delete
+            {isLoading ? 'Deleting...' : 'Delete'}
           </button>
         </div>
       </div>

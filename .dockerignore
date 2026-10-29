@@ -1,0 +1,13 @@
+# Docker ignore file for backend build context
+# Excludes heavy and sensitive local files
+node_modules
+npm-debug.log
+.env
+.env.*
+.git
+.gitignore
+.postman
+frontend
+dist
+build
+*.md

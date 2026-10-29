@@ -5,8 +5,14 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js",
-    "test": "node test-api.js"
+    "server": "node --watch server.js",
+    "client": "npm --prefix frontend run dev",
+    "dev": "concurrently -n \"API,VITE\" -c \"blue,cyan\" \"npm run server\" \"npm run client\"",
+    "build": "npm --prefix frontend run build",
+    "test": "node test-api.js",
+    "docker:up": "docker compose up --build -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
   },
   "keywords": [
     "express",
@@ -25,6 +31,7 @@
     "node-cache": "^5.1.2"
   },
   "devDependencies": {
+    "concurrently": "^10.0.5",
     "mongodb-memory-server": "^11.2.0"
   }
 }

@@ -250,9 +250,84 @@ Capture the following screenshots in Postman for your lab practical report:
 
 ---
 
+---
+
+# Practical 10 — Asynchronous Processing with Event-Driven Architecture
+
+**Course / Subject:** ADVANCED WEB DEVELOPMENT FRAMEWORKS (ITUE301)  
+**Competency / Outcome:** CO4 / PO3, PO5  
+**Topic:** Event-Driven Asynchronous Processing with Node.js Native `EventEmitter`
+
+---
+
+## Objective
+
+Implement decoupled, non-blocking asynchronous background processing using Node.js's built-in `EventEmitter` module without external message queues (RabbitMQ, Kafka, Redis Pub/Sub). The HTTP client receives immediate API responses while slow notification tasks are handled asynchronously in the background.
+
+---
+
+## Architecture & Data Flow
+
+```text
+HTTP Client (POST /tasks)
+       │
+       ▼
+1. Validate & Save Task to MongoDB (`[API] Task saved to MongoDB at ...`)
+       │
+       ▼
+2. Invalidate Cache (Practical 9: cache.del('all_tasks'))
+       │
+       ▼
+3. Log API Response Timestamp (`[API] Response sent at ...`)
+       │
+       ▼
+4. Send HTTP 201 Created Response to Client (Immediate ~10-20ms)
+       │
+       ▼
+5. Emit "task-created" Event on Shared EventEmitter
+       │
+       ▼
+6. Notification Listener (`listeners.js`)
+       ├── Log: [Listener] task-created handler started at ...
+       └── Schedule 2000ms Non-Blocking Work (`setTimeout`)
+                   │
+                   ▼ (2000ms later)
+           ├── Log: [Notification] Task "..." created at ...
+           ├── Log: [Notification] Assigned user: ...
+           └── Log: [Listener] Notification processing completed at ...
+```
+
+### Technical Note on Asynchronous Behavior in Node.js
+
+Node.js's native `EventEmitter.prototype.emit()` calls registered listener functions **synchronously** in registration order. The non-blocking asynchronous execution in this practical is achieved by scheduling the heavy/slow notification workload onto the **libuv event loop timer phase** via `setTimeout(..., 2000)`. This allows `emit()` to return control immediately back to Express, ensuring the HTTP response is dispatched without any delay to the user.
+
+---
+
+## Module Structure
+
+| Module | Location | Purpose |
+|---|---|---|
+| **Shared EventEmitter** | [`src/events/events.js`](file:///Users/JBC/Documents/SEM%205%20Practical/Advance%20WDF/PR4/src/events/events.js) | Exports a single shared singleton instance extending `EventEmitter` |
+| **Notification Listeners** | [`src/events/listeners.js`](file:///Users/JBC/Documents/SEM%205%20Practical/Advance%20WDF/PR4/src/events/listeners.js) | Registers `task-created`, `task-deleted`, and `error` listeners |
+| **Startup Registration** | [`server.js`](file:///Users/JBC/Documents/SEM%205%20Practical/Advance%20WDF/PR4/server.js) | Imports `listeners.js` once during server boot before routes are mounted |
+| **Route Integration** | [`src/routes/taskRoutes.js`](file:///Users/JBC/Documents/SEM%205%20Practical/Advance%20WDF/PR4/src/routes/taskRoutes.js) | Emits `task-created` (POST) and `task-deleted` (DELETE) after DB & cache operations |
+| **Debug Endpoint** | [`src/routes/debugRoutes.js`](file:///Users/JBC/Documents/SEM%205%20Practical/Advance%20WDF/PR4/src/routes/debugRoutes.js) | Provides `GET /debug/cache` and `POST /debug/event-error` for testing |
+
+---
+
+## Events & Listeners Reference
+
+| Event Name | Emitted By | Payload | Listener Action |
+|---|---|---|---|
+| `task-created` | `POST /tasks` | Saved task document | Logs start timestamp, schedules 2-second `setTimeout`, logs task title, assigned user, and completion timestamp |
+| `task-deleted` | `DELETE /tasks/:id` | Deleted task document | Logs `[Deletion Listener] Task "<title>" was deleted at <timestamp>` |
+| `error` | Any listener exception / `POST /debug/event-error` | `Error` instance | Logs `[Event Error] ${error.message}` to prevent uncaught process termination |
+
+---
+
 ## Automated Verification
 
-Run the comprehensive test suite (40 automated tests covering CRUD, Validation, HATEOAS, and Practical 9 Caching):
+Run the comprehensive test suite (45 automated tests covering CRUD, Validation, HATEOAS, Practical 9 Caching, and Practical 10 Events):
 
 ```bash
 npm test
@@ -260,5 +335,105 @@ npm test
 
 Expected output:
 ```text
-📊 Test Execution Summary: 40 Passed, 0 Failed
+📊 Test Execution Summary: 45 Passed, 0 Failed
 ```
+
+---
+
+---
+
+# Practical 11 — Containerization with Docker and Docker Compose
+
+**Course / Subject:** ADVANCED WEB DEVELOPMENT FRAMEWORKS (ITUE301)  
+**Competency / Outcome:** CO5 / PO3, PO5  
+**Topic:** Containerization and Multi-Container Orchestration with Docker & Docker Compose  
+
+---
+
+## Objective
+
+To containerize the full-stack application using Docker and orchestrate all three services (`frontend`, `backend`, and `mongodb`) together using Docker Compose, enabling the entire application stack to start with a single command (`docker compose up`).
+
+---
+
+## Architecture & Service Topology
+
+```text
+docker-compose.yml
+ ├── frontend (React + Vite Preview, port 5173:5173)
+ ├── backend  (Node.js / Express REST API, port 5000:5000)
+ └── mongodb  (Official MongoDB image, port 27017:27017, persistent volume)
+
+Docker Bridge Network: task-app-network
+  frontend (browser fetch) ──► backend (Express) ──► mongodb (Mongoose)
+```
+
+### Port Mapping & Internal Network
+
+| Service | Internal Container Port | Host Port Mapping | Purpose |
+|---|---|---|---|
+| **`frontend`** | `5173` | `5173:5173` | React Single Page Application served via Vite preview |
+| **`backend`** | `5000` | `127.0.0.1:5000:5000` | Node/Express REST API (binds to localhost avoiding macOS AirPlay Receiver port collision) |
+| **`mongodb`** | `27017` | `27017:27017` | MongoDB Database Server |
+
+---
+
+## Key Theory Concepts & Analysis
+
+### Q1: Why does the backend container need to reference the MongoDB container by its service name (`mongodb`) rather than `localhost`?
+> **Answer**:  
+> Every Docker container runs in its own isolated network namespace with its own private loopback interface (`127.0.0.1` / `localhost`). If the backend container attempted to connect to `localhost:27017`, it would attempt to look for MongoDB inside *its own* container, where MongoDB is not running.  
+> When services are connected to a shared user-defined Docker bridge network (`app-network`), Docker Compose activates an embedded DNS server. This DNS automatically maps the service name `mongodb` to the dynamic IP assigned to the MongoDB container on that network, enabling seamless inter-container communication (`mongodb://mongodb:27017/taskdb`).
+
+### Q2: What is the difference between `EXPOSE` in a Dockerfile and the `ports` mapping in `docker-compose.yml`?
+> **Answer**:  
+> - **`EXPOSE`**: Acts purely as documentation and container metadata. It informs developers and container engines which port the application inside the container listens on, but it does **not** publish or bind the port to the host machine.
+> - **`ports` (in docker-compose.yml)**: Actively publishes and binds container ports to host machine interfaces (e.g. `host_port:container_port`). It sets up network forwarding rules so that traffic from host browsers or external tools can enter the container.
+
+### Q3: Why is it considered bad practice to copy `node_modules` into a Docker image instead of running `npm install` inside the container?
+> **Answer**:  
+> 1. **Native Addon Mismatches**: Local `node_modules` may contain C/C++ native binary addons compiled for the host OS and architecture (e.g. macOS ARM64 / Darwin), which fail or crash when executed inside a Linux container (e.g. Alpine Linux).
+> 2. **Build Context Bloat**: Copying hundreds of megabytes of `node_modules` drastically slows down the `docker build` context transfer phase.
+> 3. **Deterministic Reproducibility**: Running `npm install` or `npm ci` directly inside the container ensures clean, platform-matched dependencies built strictly from `package-lock.json`.
+
+---
+
+## Supplementary Problems Implemented
+
+1. **`.dockerignore` Optimization**:
+   - Excludes local `node_modules`, `.env`, temporary logs, git directories, and build artifacts from both backend and frontend build contexts to minimize build context transfer time and prevent secret leakage.
+2. **Multi-Stage Build for React Frontend**:
+   - `Stage 1 (build)`: Installs dependencies and compiles React JSX into static assets in `/app/dist`.
+   - `Stage 2 (production)`: Uses a lightweight `node:20-alpine` runtime image copying only `/app/dist` and the minimal preview server, drastically reducing the final container image footprint.
+3. **Named Volume Data Persistence**:
+   - Configured named volume `task-mongo-data` (`mongo-data:/data/db`) ensuring all task data and collections persist across container restarts, stops, and rebuilds.
+
+---
+
+## Running the Complete Stack
+
+### 1. Build and Start All Services
+```bash
+docker compose up --build -d
+```
+
+### 2. Verify Running Containers
+```bash
+docker compose ps
+```
+
+### 3. View Aggregated Logs
+```bash
+docker compose logs -f
+```
+
+### 4. Stop All Services
+```bash
+docker compose down
+```
+
+### 5. Access the Running Application
+- **Frontend Web UI**: [http://localhost:5173](http://localhost:5173)
+- **Backend Health & API**: [http://localhost:5000/tasks](http://localhost:5000/tasks)
+- **Cache Debug Endpoint**: [http://localhost:5000/debug/cache](http://localhost:5000/debug/cache)
+

@@ -4,6 +4,7 @@ const Task = require('../models/Task');
 const validateTaskId = require('../middleware/idValidator');
 const { addLinksToTask, generateCollectionLinks } = require('../utils/taskLinks');
 const cache = require('../utils/cache');
+const taskEvents = require('../events/events');
 
 /**
  * @route   GET /tasks
@@ -143,7 +144,7 @@ router.get('/:id', validateTaskId, async (req, res, next) => {
  */
 router.post('/', async (req, res, next) => {
   try {
-    const { title, description, status, priority, dueDate } = req.body;
+    const { title, description, status, priority, dueDate, assignedUser } = req.body;
 
     // Create task document (triggers Mongoose schema validation)
     const newTask = new Task({
@@ -151,7 +152,8 @@ router.post('/', async (req, res, next) => {
       description,
       status,
       priority,
-      dueDate
+      dueDate,
+      assignedUser
     });
 
     const savedTask = await newTask.save();
@@ -161,12 +163,19 @@ router.post('/', async (req, res, next) => {
 
     const taskWithLinks = addLinksToTask(savedTask);
 
+    // Practical 10: Log MongoDB save and API response timestamps
+    console.log(`[API] Task saved to MongoDB at ${new Date().toISOString()}`);
+    console.log(`[API] Response sent at ${new Date().toISOString()}`);
+
     res.status(201).json({
       success: true,
       message: 'Task created successfully',
       data: taskWithLinks,
       _links: taskWithLinks._links
     });
+
+    // Practical 10: Asynchronously notify listeners via EventEmitter
+    taskEvents.emit('task-created', savedTask);
   } catch (err) {
     next(err);
   }
@@ -283,6 +292,9 @@ router.delete('/:id', validateTaskId, async (req, res, next) => {
       message: 'Task deleted successfully',
       data: deletedTask
     });
+
+    // Practical 10: Emit task-deleted event with deleted task document
+    taskEvents.emit('task-deleted', deletedTask);
   } catch (err) {
     next(err);
   }
