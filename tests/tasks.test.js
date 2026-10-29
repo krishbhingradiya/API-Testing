@@ -41,7 +41,7 @@ describe('Task Manager REST API & CI Automated Test Suite', () => {
       const res = await request(app)
         .get('/tasks')
         .expect('Content-Type', /json/)
-        .expect(200);
+        .expect(500); // Intentionally broken expectation to demonstrate failed CI pipeline (Red X)
 
       expect(res.body.success).toBe(true);
       expect(Array.isArray(res.body.data)).toBe(true);
