@@ -17,10 +17,12 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/taskdb';
 
-// Connect to MongoDB Database
-mongoose.connect(MONGO_URI)
-  .then(() => console.log('✅ MongoDB connected successfully'))
-  .catch((err) => console.error('❌ MongoDB connection error:', err.message));
+// Connect to MongoDB Database (skip auto-connection in test environment for isolated CI testing)
+if (process.env.NODE_ENV !== 'test') {
+  mongoose.connect(MONGO_URI)
+    .then(() => console.log('✅ MongoDB connected successfully'))
+    .catch((err) => console.error('❌ MongoDB connection error:', err.message));
+}
 
 // 1. Parse JSON body payloads
 app.use(express.json());

@@ -1,7 +1,13 @@
-# Practical 9 — In-Memory Caching and Query Optimization
+# TaskFlow — Full-Stack Task Management Application
+
+[![CI Pipeline](https://github.com/krishbhingradiya/API-Testing/actions/workflows/ci.yml/badge.svg)](https://github.com/krishbhingradiya/API-Testing/actions/workflows/ci.yml)
 
 **Subject:** ADVANCED WEB DEVELOPMENT FRAMEWORKS (ITUE301)  
-**Application:** TaskFlow — Full-Stack Task Management Application
+**Repository:** [krishbhingradiya/API-Testing](https://github.com/krishbhingradiya/API-Testing)  
+
+---
+
+# Practical 9 — In-Memory Caching and Query Optimization
 
 ---
 
@@ -436,4 +442,83 @@ docker compose down
 - **Frontend Web UI**: [http://localhost:5173](http://localhost:5173)
 - **Backend Health & API**: [http://localhost:5000/tasks](http://localhost:5000/tasks)
 - **Cache Debug Endpoint**: [http://localhost:5000/debug/cache](http://localhost:5000/debug/cache)
+
+---
+---
+
+# Practical 12 — Continuous Integration with GitHub Actions
+
+**Subject:** ADVANCED WEB DEVELOPMENT FRAMEWORKS (ITUE301)  
+**Pipeline Status:** [![CI Pipeline](https://github.com/krishbhingradiya/API-Testing/actions/workflows/ci.yml/badge.svg)](https://github.com/krishbhingradiya/API-Testing/actions/workflows/ci.yml)  
+**Workflow File:** [`.github/workflows/ci.yml`](.github/workflows/ci.yml)  
+**Documentation Report:** [`docs/practical-12/README.md`](docs/practical-12/README.md)
+
+---
+
+## Objective
+
+To design, configure, and automate a production-grade Continuous Integration (CI) pipeline using **GitHub Actions**, **Jest**, and **Supertest** that automatically validates every push to the `main` branch.
+
+---
+
+## CI Workflow Pipeline (`.github/workflows/ci.yml`)
+
+The automated workflow triggers on every push to `main` and on pull requests:
+
+```yaml
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Run Automated Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20 LTS Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Execute Automated Test Suite (Jest & Supertest)
+        run: npm test
+```
+
+---
+
+## Automated Test Suite (`tests/tasks.test.js`)
+
+Jest and Supertest execute in-memory tests without requiring a running database:
+
+1. **`GET /tasks`**: Asserts HTTP 200, valid JSON array, item count, and Level 3 HATEOAS collection pagination links.
+2. **`GET /debug/cache`**: Asserts HTTP 200 and runtime statistics (`hits`, `misses`, `totalRequests`, `hitRate`, `activeKeys`).
+3. **`GET /tasks/:id` (Validation)**: Asserts HTTP 400 Bad Request when an invalid 24-hex MongoDB ObjectId format is supplied.
+4. **`POST /tasks` (Schema Validation)**: Asserts HTTP 400 Bad Request when mandatory fields (`title`, `description`) are missing.
+
+---
+
+## Running Tests Locally
+
+```bash
+# Run automated Jest test suite
+npm test
+
+# Run tests with code coverage analysis
+npx jest --coverage
+```
+
 

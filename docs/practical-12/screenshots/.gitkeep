@@ -1,0 +1,3 @@
+# Directory for Practical 12 GitHub Actions Pipeline Screenshots:
+# - ci-failed.png (Red X - failed workflow run)
+# - ci-passed.png (Green checkmark - passing workflow run)
