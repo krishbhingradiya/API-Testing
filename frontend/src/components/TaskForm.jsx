@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { createTask, updateTask, getTaskById } from '../api/taskApi';
+import { createTask, updateTask, getTaskById, generateTaskDescription } from '../api/taskApi';
 import { useToast } from '../context/ToastContext';
 import './TaskForm.css';
+import './TaskModal.css';
 
 /**
  * TaskForm — Handles both Create and Edit modes for tasks.
@@ -24,6 +25,40 @@ export default function TaskForm() {
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(isEditMode);
   const [error, setError] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiFeedback, setAiFeedback] = useState(null);
+
+  const handleGenerateDescription = async () => {
+    if (!formData.title.trim()) {
+      setAiFeedback({
+        type: 'error',
+        message: 'Please enter a task title first so the AI can generate a relevant description.',
+      });
+      return;
+    }
+
+    setAiLoading(true);
+    setAiFeedback(null);
+
+    const result = await generateTaskDescription(formData.title.trim());
+    setAiLoading(false);
+
+    if (result.success && result.description) {
+      setFormData((prev) => ({
+        ...prev,
+        description: result.description,
+      }));
+      setAiFeedback({
+        type: 'success',
+        message: 'AI description generated! Review and edit before saving.',
+      });
+    } else {
+      setAiFeedback({
+        type: 'error',
+        message: result.message || 'AI generation failed. Please enter the description manually.',
+      });
+    }
+  };
 
   // Fetch existing task data in edit mode
   useEffect(() => {
@@ -136,17 +171,57 @@ export default function TaskForm() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="description" className="form-label">Description</label>
+            <div className="modal-label-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <label htmlFor="description" className="form-label" style={{ margin: 0 }}>Description</label>
+              <button
+                type="button"
+                className="btn-ai-generate"
+                onClick={handleGenerateDescription}
+                disabled={aiLoading}
+                id="btn-generate-ai-description-page"
+              >
+                {aiLoading ? (
+                  <>
+                    <span className="spinner" style={{ width: '12px', height: '12px' }}></span>
+                    Generating...
+                  </>
+                ) : (
+                  <>✨ Generate description with AI</>
+                )}
+              </button>
+            </div>
+
+            {/* AI Feedback Banner */}
+            {aiFeedback && (
+              <div
+                className={`ai-banner ${
+                  aiFeedback.type === 'success' ? 'ai-banner--success' : 'ai-banner--error'
+                }`}
+                style={{ marginBottom: '8px' }}
+                role="alert"
+              >
+                <span>{aiFeedback.type === 'success' ? '✓' : '⚠'}</span>
+                <span>{aiFeedback.message}</span>
+              </div>
+            )}
+
             <textarea
               id="description"
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Describe the task..."
+              placeholder="Additional details, requirements, or notes..."
               required
               className="form-input form-textarea"
               rows={4}
             />
+
+            <div className="ai-disclaimer" style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>ⓘ</span>
+              <span>
+                AI-generated suggestion: Review and edit this content before saving. AI-generated content may be inaccurate.
+              </span>
+            </div>
           </div>
 
           <div className="form-row">

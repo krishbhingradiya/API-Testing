@@ -9,6 +9,7 @@ const notFoundHandler = require('./src/middleware/notFound');
 const errorHandler = require('./src/middleware/errorHandler');
 const taskRoutes = require('./src/routes/taskRoutes');
 const debugRoutes = require('./src/routes/debugRoutes');
+const aiRoutes = require('./src/routes/aiRoutes');
 
 // Practical 10: Register EventEmitter listeners once during application startup
 require('./src/events/listeners');
@@ -42,6 +43,8 @@ app.use(contentTypeMiddleware);
 // 5. Mount REST API Routes
 app.use('/tasks', taskRoutes);
 app.use('/debug', debugRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/ai', aiRoutes);
 
 // 6. 404 Handler for undefined routes
 app.use(notFoundHandler);

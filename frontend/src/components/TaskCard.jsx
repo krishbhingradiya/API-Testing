@@ -19,7 +19,7 @@ const PRIORITY_CONFIG = {
   high: { label: 'High', className: 'priority--high' },
 };
 
-function TaskCard({ task, onDelete, isOptimistic }) {
+function TaskCard({ task, onDelete, onEdit, isOptimistic }) {
   const navigate = useNavigate();
   const status = STATUS_CONFIG[task.status] || STATUS_CONFIG.pending;
   const priority = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.medium;
@@ -67,7 +67,7 @@ function TaskCard({ task, onDelete, isOptimistic }) {
           <div className="task-card__actions">
             <button
               className="task-card__btn task-card__btn--edit"
-              onClick={() => navigate(`/edit/${task._id}`)}
+              onClick={() => onEdit ? onEdit(task) : navigate(`/edit/${task._id}`)}
               title="Edit task"
               aria-label={`Edit task: ${task.title}`}
               id={`edit-btn-${task._id}`}

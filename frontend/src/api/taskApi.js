@@ -124,3 +124,42 @@ export const deleteTask = async (id) => {
     return { success: false, error: err.message };
   }
 };
+
+/**
+ * Practical 13: POST /api/ai/generate-description — Request AI-generated task description
+ * @param {string} title - Task title used to contextualize AI prompt
+ */
+export const generateTaskDescription = async (title) => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/ai/generate-description`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title }),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: json.message || 'AI description generation failed',
+        rateLimited: res.status === 429,
+        configured: json.configured !== false,
+        status: res.status,
+      };
+    }
+
+    return {
+      success: true,
+      description: json.description,
+      provider: json.provider,
+      model: json.model,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      message: 'AI suggestions are temporarily unavailable. Please enter the task description manually.',
+      status: 500,
+    };
+  }
+};

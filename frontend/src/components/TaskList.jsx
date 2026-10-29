@@ -4,6 +4,7 @@ import { getTasks, deleteTask } from '../api/taskApi';
 import { useToast } from '../context/ToastContext';
 import TaskCard from './TaskCard';
 import ConfirmDialog from './ConfirmDialog';
+import TaskModal from './TaskModal';
 import './TaskList.css';
 
 /**
@@ -30,6 +31,20 @@ export default function TaskList() {
   // Delete confirmation state
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Practical 13: Task Modal with AI state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
+
+  const handleOpenCreateModal = () => {
+    setEditingTask(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (task) => {
+    setEditingTask(task);
+    setIsModalOpen(true);
+  };
 
   // Fetch tasks from backend — re-fetches on page/filter changes
   const fetchTasks = useCallback(async () => {
@@ -175,7 +190,7 @@ export default function TaskList() {
 
         <button
           className="btn btn--primary btn--create"
-          onClick={() => navigate('/create')}
+          onClick={handleOpenCreateModal}
           id="create-task-btn"
         >
           <span>+</span> New Task
@@ -252,6 +267,7 @@ export default function TaskList() {
                 key={task._id}
                 task={task}
                 onDelete={handleDeleteRequest}
+                onEdit={handleOpenEditModal}
                 isOptimistic={task._optimistic}
               />
             ))}
@@ -296,6 +312,14 @@ export default function TaskList() {
         isLoading={deleting}
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
+      />
+
+      {/* Practical 13: Task Modal with AI Assistant */}
+      <TaskModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={fetchTasks}
+        initialTask={editingTask}
       />
     </div>
   );
