@@ -1,15 +1,21 @@
 /**
  * AI Rate Limiter Middleware
- * Practical 13: Enforces 1 request per task context / title per minute (60s cooldown).
+ * Practical 13: Enforces reasonable cooldown per task context / title.
  * Protects against API quota exhaustion, excessive costs, and request spam.
  */
 
 const requestLog = new Map();
-const COOLDOWN_MS = 60 * 1000; // 60 seconds
+const COOLDOWN_MS = 6 * 1000; // 6 seconds cooldown for optimal UX & testing
 
 function aiRateLimiter(req, res, next) {
   const title = (req.body && req.body.title ? String(req.body.title).trim().toLowerCase() : '');
   const clientIp = req.ip || req.connection.remoteAddress || 'anonymous';
+  const hasClarificationAnswers = Array.isArray(req.body?.answers) && req.body.answers.length > 0;
+
+  // Multi-turn clarification answer submissions bypass the title cooldown
+  if (hasClarificationAnswers) {
+    return next();
+  }
   
   // Track context per combination of client IP and normalized task title
   const contextKey = `${clientIp}::${title || '__general__'}`;

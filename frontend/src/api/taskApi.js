@@ -127,14 +127,22 @@ export const deleteTask = async (id) => {
 
 /**
  * Practical 13: POST /api/ai/generate-description — Request AI-generated task description
- * @param {string} title - Task title used to contextualize AI prompt
+ * Supports both Path A (NEEDS_CLARIFICATION with questions) and Path B (READY direct generation)
+ * @param {string} title - Task title
+ * @param {Object} context - Optional { answers: [{ question, answer }], goal, techStack, style }
  */
-export const generateTaskDescription = async (title) => {
+export const generateTaskDescription = async (title, context = {}) => {
   try {
     const res = await fetch(`${BASE_URL}/api/ai/generate-description`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title }),
+      body: JSON.stringify({
+        title,
+        answers: context.answers || [],
+        goal: context.goal,
+        techStack: context.techStack,
+        style: context.style,
+      }),
     });
 
     const json = await res.json();
@@ -151,7 +159,9 @@ export const generateTaskDescription = async (title) => {
 
     return {
       success: true,
-      description: json.description,
+      status: json.status || (json.description ? 'ready' : 'needs_clarification'),
+      questions: json.questions || [],
+      description: json.description || null,
       provider: json.provider,
       model: json.model,
     };

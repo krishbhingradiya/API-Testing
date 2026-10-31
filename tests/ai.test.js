@@ -3,7 +3,7 @@ const app = require('../server');
 const aiRateLimiter = require('../src/middleware/aiRateLimiter');
 const aiService = require('../src/services/aiService');
 
-describe('Practical 13: AI API Integration Test Suite', () => {
+describe('Practical 13: Intelligent AI Task Understanding & Context-Aware Test Suite', () => {
   beforeEach(() => {
     aiRateLimiter.reset();
     jest.restoreAllMocks();
@@ -29,7 +29,9 @@ describe('Practical 13: AI API Integration Test Suite', () => {
     it('should return HTTP 200 with generated description when AI service succeeds', async () => {
       const mockDescription = 'Develop a comprehensive test suite covering both React frontend and Node.js backend components.';
       jest.spyOn(aiService, 'generateDescription').mockResolvedValue({
+        status: 'ready',
         description: mockDescription,
+        questions: [],
         provider: 'Google Gemini',
         model: 'gemini-1.5-flash'
       });
@@ -48,7 +50,9 @@ describe('Practical 13: AI API Integration Test Suite', () => {
 
     it('should return HTTP 429 when rate limit is exceeded on consecutive requests for the same title', async () => {
       jest.spyOn(aiService, 'generateDescription').mockResolvedValue({
+        status: 'ready',
         description: 'First generation description.',
+        questions: [],
         provider: 'Google Gemini',
         model: 'gemini-1.5-flash'
       });
@@ -89,6 +93,83 @@ describe('Practical 13: AI API Integration Test Suite', () => {
       expect(res.body.success).toBe(false);
       expect(res.body.configured).toBe(false);
       expect(res.body.message).toContain('AI suggestions are temporarily unavailable (API key not configured)');
+    });
+
+    // --- NEW INTELLIGENT AI PATH TESTS ---
+
+    it('Path A: should return status needs_clarification with 2-3 dynamic questions for vague title "hello"', async () => {
+      const res = await request(app)
+        .post('/api/ai/generate-description')
+        .send({ title: 'hello' })
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      expect(res.body.success).toBe(true);
+      expect(res.body.status).toBe('needs_clarification');
+      expect(Array.isArray(res.body.questions)).toBe(true);
+      expect(res.body.questions.length).toBeGreaterThanOrEqual(2);
+      expect(res.body.questions.length).toBeLessThanOrEqual(3);
+      expect(res.body.description).toBeNull();
+    });
+
+    it('Path A: should return status needs_clarification with tailored questions for "project"', async () => {
+      const res = await request(app)
+        .post('/api/ai/generate-description')
+        .send({ title: 'project' })
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      expect(res.body.success).toBe(true);
+      expect(res.body.status).toBe('needs_clarification');
+      expect(res.body.questions.some(q => q.toLowerCase().includes('project'))).toBe(true);
+      expect(res.body.description).toBeNull();
+    });
+
+    it('Path B: should directly generate description with status ready for specific title "Prepare React Practical 11 Docker deployment"', async () => {
+      const res = await request(app)
+        .post('/api/ai/generate-description')
+        .send({ title: 'Prepare React Practical 11 Docker deployment' })
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      expect(res.body.success).toBe(true);
+      expect(res.body.status).toBe('ready');
+      expect(res.body.questions).toEqual([]);
+      expect(typeof res.body.description).toBe('string');
+      expect(res.body.description.toLowerCase()).toContain('docker');
+    });
+
+    it('Path B: should directly generate description with status ready for "Fix login authentication bug in React application"', async () => {
+      const res = await request(app)
+        .post('/api/ai/generate-description')
+        .send({ title: 'Fix login authentication bug in React application' })
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      expect(res.body.success).toBe(true);
+      expect(res.body.status).toBe('ready');
+      expect(res.body.description.toLowerCase()).toContain('authentication');
+    });
+
+    it('Multi-Turn Clarification: should synthesize answers into actionable description when user submits clarification', async () => {
+      const answers = [
+        { question: 'What are you planning to do?', answer: 'I want to complete my React practical assignment' },
+        { question: 'What is the main objective?', answer: 'Dockerize my Task Management application' },
+        { question: 'What is the expected outcome?', answer: 'Verify frontend, backend and MongoDB containers are healthy' }
+      ];
+
+      const res = await request(app)
+        .post('/api/ai/generate-description')
+        .send({ title: 'hello', answers })
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      expect(res.body.success).toBe(true);
+      expect(res.body.status).toBe('ready');
+      expect(res.body.questions).toEqual([]);
+      expect(typeof res.body.description).toBe('string');
+      expect(res.body.description.toLowerCase()).toContain('react');
+      expect(res.body.description.toLowerCase()).toContain('task management');
     });
   });
 });

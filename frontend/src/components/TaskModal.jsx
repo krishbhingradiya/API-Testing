@@ -4,11 +4,15 @@ import { useToast } from '../context/ToastContext';
 import './TaskModal.css';
 
 /**
- * TaskModal — Interactive Modal with Practical 13 AI Integration
+ * TaskModal — Interactive Modal with Intelligent AI Task Understanding (Practical 13)
+ * 
  * Features:
- * - AI-powered task description generation (OpenAI / Gemini backend)
- * - Rate-limit & fallback banner handling
- * - Full manual fallback when AI is unavailable
+ * - Intelligent title analysis (Path A: Clarification questions vs Path B: Direct generation)
+ * - Multi-turn conversation flow preserving title, questions, and user answers
+ * - Dynamic 2-3 contextual questions for unclear/brief titles
+ * - Direct 1-click description generation for clear and actionable titles
+ * - Editable description field with safety disclaimers
+ * - Automatic reset of clarification when user edits the title
  */
 export default function TaskModal({ isOpen, onClose, onSuccess, initialTask = null }) {
   const isEditMode = Boolean(initialTask && initialTask._id);
@@ -24,7 +28,21 @@ export default function TaskModal({ isOpen, onClose, onSuccess, initialTask = nu
 
   const [saving, setSaving] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
-  const [aiFeedback, setAiFeedback] = useState(null); // { type: 'success' | 'error', message: '' }
+  const [aiFeedback, setAiFeedback] = useState(null); // { type: 'success' | 'error' | 'info', message: '' }
+  
+  // Intelligent Clarification State
+  const [aiStatus, setAiStatus] = useState('idle'); // 'idle' | 'clarification' | 'ready'
+  const [clarificationQuestions, setClarificationQuestions] = useState([]);
+  const [clarificationAnswers, setClarificationAnswers] = useState({});
+
+  // Helper to reset AI and clarification states
+  const resetAiState = () => {
+    setAiLoading(false);
+    setAiFeedback(null);
+    setAiStatus('idle');
+    setClarificationQuestions([]);
+    setClarificationAnswers({});
+  };
 
   useEffect(() => {
     if (initialTask) {
@@ -44,32 +62,110 @@ export default function TaskModal({ isOpen, onClose, onSuccess, initialTask = nu
         dueDate: '',
       });
     }
-    setAiFeedback(null);
+    // Reset all AI and clarification states on open/task change
+    resetAiState();
   }, [initialTask, isOpen]);
 
-  if (!isOpen) return null;
+  const handleTitleChange = (e) => {
+    const newTitle = e.target.value;
+    setFormData((prev) => ({ ...prev, title: newTitle }));
+
+    // Edge Case 6: If user edits title while in clarification mode, discard outdated questions
+    if (aiStatus === 'clarification') {
+      setAiStatus('idle');
+      setClarificationQuestions([]);
+      setClarificationAnswers({});
+      setAiFeedback(null);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleAnswerChange = (index, value) => {
+    setClarificationAnswers((prev) => ({
+      ...prev,
+      [index]: value,
+    }));
+  };
+
   /**
-   * Practical 13: Handle AI Description Generation
+   * STEP 2 & 3: User clicks "Generate Description with AI"
+   * Sends title to Gemini -> decides either NEEDS_CLARIFICATION or READY
    */
-  const handleGenerateDescription = async () => {
-    if (!formData.title.trim()) {
+  const handleInitialAiRequest = async () => {
+    const title = formData.title.trim();
+
+    // Edge Case 1: Empty task title
+    if (!title) {
       setAiFeedback({
         type: 'error',
-        message: 'Please enter a task title first so the AI can generate a relevant description.',
+        message: '⚠️ Please enter a task title first so the AI knows what to generate.',
       });
+      document.getElementById('modal-title')?.focus();
       return;
     }
 
     setAiLoading(true);
     setAiFeedback(null);
 
-    const result = await generateTaskDescription(formData.title.trim());
+    const result = await generateTaskDescription(title);
+    setAiLoading(false);
+
+    if (!result.success) {
+      setAiFeedback({
+        type: 'error',
+        message: result.message || 'AI generation failed. Please enter the description manually.',
+      });
+      return;
+    }
+
+    // PATH A: Unclear or insufficient title -> Ask clarification questions
+    if (result.status === 'needs_clarification' && Array.isArray(result.questions) && result.questions.length > 0) {
+      setAiStatus('clarification');
+      setClarificationQuestions(result.questions);
+      setClarificationAnswers({});
+      setAiFeedback({
+        type: 'info',
+        message: `ℹ️ The title "${title}" is brief. Please answer these quick questions so the AI can craft an accurate description:`,
+      });
+      return;
+    }
+
+    // PATH B: Clear and meaningful title -> Direct generation immediately
+    if (result.description) {
+      setFormData((prev) => ({
+        ...prev,
+        description: result.description,
+      }));
+      setAiStatus('ready');
+      setAiFeedback({
+        type: 'success',
+        message: `✓ Actionable description generated by AI! Review or edit below before saving.`,
+      });
+    }
+  };
+
+  /**
+   * STEP 4: User submits answers to the clarification questions
+   * Sends title + questions + answers to Gemini -> synthesizes full actionable description
+   */
+  const handleClarificationSubmit = async (e) => {
+    e.preventDefault();
+    const title = formData.title.trim();
+
+    // Map questions with user answers
+    const answersPayload = clarificationQuestions.map((q, idx) => ({
+      question: q,
+      answer: (clarificationAnswers[idx] || '').trim(),
+    }));
+
+    setAiLoading(true);
+    setAiFeedback(null);
+
+    const result = await generateTaskDescription(title, { answers: answersPayload });
     setAiLoading(false);
 
     if (result.success && result.description) {
@@ -77,14 +173,17 @@ export default function TaskModal({ isOpen, onClose, onSuccess, initialTask = nu
         ...prev,
         description: result.description,
       }));
+      setAiStatus('ready');
+      setClarificationQuestions([]);
+      setClarificationAnswers({});
       setAiFeedback({
         type: 'success',
-        message: 'AI description generated! Review and edit before saving.',
+        message: `✓ Meaningful description generated from your answers! Review or edit below before saving.`,
       });
     } else {
       setAiFeedback({
         type: 'error',
-        message: result.message || 'AI generation failed. Please enter the description manually.',
+        message: result.message || 'Failed to synthesize description. Please enter description manually.',
       });
     }
   };
@@ -114,6 +213,8 @@ export default function TaskModal({ isOpen, onClose, onSuccess, initialTask = nu
     }
   };
 
+  if (!isOpen) return null;
+
   return (
     <div className="task-modal-overlay" onClick={onClose}>
       <div className="task-modal" onClick={(e) => e.stopPropagation()}>
@@ -138,15 +239,15 @@ export default function TaskModal({ isOpen, onClose, onSuccess, initialTask = nu
                 id="modal-title"
                 name="title"
                 value={formData.title}
-                onChange={handleChange}
-                placeholder="e.g. Implement React + Node + MongoDB full stack flow"
+                onChange={handleTitleChange}
+                placeholder="e.g. Prepare React Practical 11 Docker deployment"
                 required
                 className="modal-input"
                 autoFocus
               />
             </div>
 
-            {/* Description & AI Generator Button */}
+            {/* Description & AI Generator Button Row */}
             <div className="modal-form-group">
               <div className="modal-label-row">
                 <label htmlFor="modal-description" className="modal-label">
@@ -155,17 +256,21 @@ export default function TaskModal({ isOpen, onClose, onSuccess, initialTask = nu
                 <button
                   type="button"
                   className="btn-ai-generate"
-                  onClick={handleGenerateDescription}
+                  onClick={handleInitialAiRequest}
                   disabled={aiLoading}
                   id="btn-generate-ai-description"
+                  title="Generate a context-aware description with Google Gemini"
                 >
-                  {aiLoading ? (
+                  {aiLoading && aiStatus !== 'clarification' ? (
                     <>
                       <span className="spinner" style={{ width: '12px', height: '12px' }}></span>
-                      Generating...
+                      Analyzing title...
                     </>
                   ) : (
-                    <>✨ Generate description with AI</>
+                    <>
+                      <span>✨</span>
+                      <span>Generate Description with AI</span>
+                    </>
                   )}
                 </button>
               </div>
@@ -174,21 +279,98 @@ export default function TaskModal({ isOpen, onClose, onSuccess, initialTask = nu
               {aiFeedback && (
                 <div
                   className={`ai-banner ${
-                    aiFeedback.type === 'success' ? 'ai-banner--success' : 'ai-banner--error'
+                    aiFeedback.type === 'success'
+                      ? 'ai-banner--success'
+                      : aiFeedback.type === 'info'
+                      ? 'ai-banner--info'
+                      : 'ai-banner--error'
                   }`}
                   role="alert"
                 >
-                  <span>{aiFeedback.type === 'success' ? '✓' : '⚠'}</span>
-                  <span>{aiFeedback.message}</span>
+                  <span className="ai-banner__icon">
+                    {aiFeedback.type === 'success' ? '✓' : aiFeedback.type === 'info' ? 'ℹ' : '⚠'}
+                  </span>
+                  <span className="ai-banner__text">{aiFeedback.message}</span>
                 </div>
               )}
 
+              {/* PATH A: Dynamic Clarification Questions Card */}
+              {aiStatus === 'clarification' && clarificationQuestions.length > 0 && (
+                <div className="ai-clarification-card" id="ai-clarification-panel">
+                  <div className="ai-clarification-card__header">
+                    <div className="ai-clarification-card__title">
+                      <span>🤖</span>
+                      <strong>Help AI Understand Your Goal</strong>
+                      <span className="ai-clarification-badge">Clarification Needed</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="ai-clarification-card__close"
+                      onClick={() => setAiStatus('idle')}
+                      title="Dismiss questions and write description manually"
+                    >
+                      &times;
+                    </button>
+                  </div>
+
+                  <p className="ai-clarification-card__intro">
+                    The title <strong>"{formData.title}"</strong> needs a bit more context. Answer these {clarificationQuestions.length} quick questions to get an accurate, professional description:
+                  </p>
+
+                  <div className="ai-clarification-questions-list">
+                    {clarificationQuestions.map((question, idx) => (
+                      <div key={idx} className="ai-clarification-q-item">
+                        <label className="ai-clarification-q-label">
+                          <span className="ai-q-number">{idx + 1}</span>
+                          <span className="ai-q-text">{question}</span>
+                        </label>
+                        <input
+                          type="text"
+                          className="ai-clarification-input"
+                          value={clarificationAnswers[idx] || ''}
+                          onChange={(e) => handleAnswerChange(idx, e.target.value)}
+                          placeholder="Your answer..."
+                          disabled={aiLoading}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="ai-clarification-actions">
+                    <button
+                      type="button"
+                      className="btn-ai-submit-answers"
+                      onClick={handleClarificationSubmit}
+                      disabled={aiLoading}
+                    >
+                      {aiLoading ? (
+                        <>
+                          <span className="spinner" style={{ width: '12px', height: '12px' }}></span>
+                          Generating Description...
+                        </>
+                      ) : (
+                        '✨ Generate My Description'
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-ai-cancel-clarification"
+                      onClick={() => setAiStatus('idle')}
+                      disabled={aiLoading}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Editable Description Textarea */}
               <textarea
                 id="modal-description"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="Additional details, requirements, or notes..."
+                placeholder="Enter description manually or generate automatically with AI..."
                 required
                 className="modal-textarea"
                 rows={4}

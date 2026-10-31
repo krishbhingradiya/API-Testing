@@ -39,11 +39,15 @@ services:
     ports:
       # Host port 5001 mapped to container port 5000 (avoids macOS AirPlay collision on port 5000)
       - "127.0.0.1:5001:5000"
+    env_file:
+      - .env
     environment:
       - PORT=5000
       # Uses Docker service name 'mongodb' instead of localhost for container networking
       - MONGO_URI=mongodb://mongodb:27017/taskdb
       - NODE_ENV=production
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.5-flash}
     depends_on:
       mongodb:
         condition: service_healthy

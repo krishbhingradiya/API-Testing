@@ -5,13 +5,18 @@ const aiService = require('../services/aiService');
 
 /**
  * @route   POST /api/ai/generate-description
- * @desc    Generate an AI-assisted task description from task title
+ * @desc    Intelligent AI Task Understanding & Context-Aware Description Generation
+ *          - Classifies title as 'needs_clarification' or 'ready'
+ *          - If 'needs_clarification', returns 2-3 dynamic questions and description: null
+ *          - If 'ready', returns direct actionable task description and questions: []
+ *          - When answers are provided, synthesizes multi-turn context into a comprehensive description
  * @access  Public (protected by rate limiter)
  */
 router.post('/generate-description', aiRateLimiter, async (req, res) => {
   try {
-    const { title } = req.body || {};
+    const { title, answers, goal, techStack, style } = req.body || {};
 
+    // 1. Validate mandatory task title
     if (!title || typeof title !== 'string' || title.trim().length === 0) {
       return res.status(400).json({
         success: false,
@@ -19,13 +24,20 @@ router.post('/generate-description', aiRateLimiter, async (req, res) => {
       });
     }
 
-    const result = await aiService.generateDescription(title);
+    // 2. Perform intelligent task understanding & generation
+    const result = await aiService.generateDescription(title, { answers, goal, techStack, style });
+
+    const status = result.status || (result.description ? 'ready' : 'needs_clarification');
+    const questions = Array.isArray(result.questions) ? result.questions : [];
+    const description = result.description || null;
 
     return res.status(200).json({
       success: true,
-      description: result.description,
-      provider: result.provider,
-      model: result.model
+      status: status,
+      questions: questions,
+      description: description,
+      provider: result.provider || 'Google Gemini',
+      model: result.model || 'gemini-2.5-flash'
     });
   } catch (err) {
     console.error('⚠️ [AI Generation Handler Caught Exception]:', err.message);
