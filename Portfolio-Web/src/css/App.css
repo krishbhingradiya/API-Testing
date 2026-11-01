@@ -1,0 +1,55 @@
+/* ============================================================
+   App-Level Styles (App.css)
+   ============================================================
+   - Styles for the root App layout container.
+   - Shared animation keyframe used by multiple pages.
+   - Page transition effect.
+   ============================================================ */
+
+/* ===== App Layout ===== */
+/* The App wrapper uses a flex column so the footer always
+   sticks to the bottom, even on short pages. */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* The main content area grows to fill available space,
+   pushing the footer to the bottom. */
+.app-main {
+  flex: 1;
+}
+
+/* ============================================================
+   Shared Keyframes
+   ============================================================
+   This animation is used by .fade-in-section across all pages
+   (Home, Projects, About). Placing it here avoids duplication. */
+
+@keyframes section-fade-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   Page Transition
+   ============================================================
+   Simple fade-in when navigating between pages. */
+
+.page-transition {
+  animation: page-enter 0.4s ease;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

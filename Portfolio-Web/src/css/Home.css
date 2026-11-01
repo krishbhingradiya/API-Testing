@@ -1,0 +1,182 @@
+/* ============================================================
+   Home Page Styles
+   ============================================================
+   - Section layout and spacing
+   - "Why Choose Me" glassmorphism feature cards
+   - Skills Preview grid
+   - Fade-in scroll animation via CSS
+   ============================================================ */
+
+/* ===== Shared Section Container ===== */
+/* Keeps content centered and constrained on all screen sizes */
+.home-section-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ===== Section Titles ===== */
+.home-section-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+/* Gradient highlight text (reused across sections) */
+.gradient-text {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Section subtitle */
+.home-section-subtitle {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+  max-width: 550px;
+  margin: 0 auto 48px;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   "Why Choose Me" Section
+   ============================================================ */
+.home-features {
+  padding: 100px 24px;
+}
+
+/* 2×2 grid on desktop, 1 column on mobile */
+.home-features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+/* ===== Individual Feature Card ===== */
+.home-feature-card {
+  padding: 36px 28px;
+  border-radius: 16px;
+
+  /* Glassmorphism */
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  /* Hover transition */
+  transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.home-feature-card:hover {
+  transform: translateY(-6px);
+  background-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 40px rgba(59, 130, 246, 0.12);
+}
+
+:root.light-mode .home-feature-card:hover {
+  background-color: rgba(15, 23, 42, 0.08);
+}
+
+/* Icon circle */
+.feature-card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+
+  /* Gradient background for the icon container */
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
+  color: var(--color-primary);
+}
+
+/* Card title */
+.feature-card-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 10px;
+}
+
+/* Card description */
+.feature-card-description {
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: var(--color-text-muted);
+}
+
+/* ============================================================
+   Skills Preview Section
+   ============================================================ */
+.home-skills {
+  padding: 80px 24px 120px;
+}
+
+/* Wrapping flex row for skill badges */
+.home-skills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+}
+
+/* ============================================================
+   Fade-In Animation for Sections
+   ============================================================
+   Uses CSS animation to fade in elements as the page loads.
+   This is a simple approach; for scroll-triggered animations
+   you would need IntersectionObserver (avoided here for
+   beginner-friendliness). */
+
+.fade-in-section {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: section-fade-in 0.8s ease forwards;
+}
+
+/* Stagger delays for sequential reveal */
+.home-features .home-section-title    { animation-delay: 0.1s; }
+.home-features .home-section-subtitle { animation-delay: 0.2s; }
+.home-feature-card:nth-child(1) { animation-delay: 0.3s; }
+.home-feature-card:nth-child(2) { animation-delay: 0.4s; }
+.home-feature-card:nth-child(3) { animation-delay: 0.5s; }
+.home-feature-card:nth-child(4) { animation-delay: 0.6s; }
+
+.home-skills .home-section-title    { animation-delay: 0.7s; }
+.home-skills .home-section-subtitle { animation-delay: 0.8s; }
+.home-skills .home-skills-grid      { animation-delay: 0.9s; }
+
+@keyframes section-fade-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   Responsive – Tablet & Mobile
+   ============================================================ */
+@media (max-width: 768px) {
+  .home-section-title {
+    font-size: 1.8rem;
+  }
+
+  .home-features {
+    padding: 70px 20px;
+  }
+
+  /* Switch to single-column cards on mobile */
+  .home-features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-skills {
+    padding: 60px 20px 90px;
+  }
+}

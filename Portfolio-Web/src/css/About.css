@@ -1,0 +1,311 @@
+/* ============================================================
+   About Page Styles
+   ============================================================
+   - Page layout, intro card, skills grid, achievements,
+     timeline section, and contact form wrapper
+   - Uses CSS design tokens for dark/light mode toggle compatibility
+   - Responsive design
+   ============================================================ */
+
+/* ===== Page Wrapper ===== */
+.about-page {
+  padding: 120px 24px 100px;
+  min-height: 100vh;
+}
+
+/* ===== Inner Container ===== */
+.about-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ===== Page Title ===== */
+.about-page-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+/* ============================================================
+   About Me – Intro Card
+   ============================================================ */
+.about-intro-section {
+  margin-bottom: 60px;
+}
+
+.about-info-card {
+  padding: 36px 32px;
+  border-radius: 20px;
+
+  /* Glassmorphism */
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.about-info-name {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 14px;
+}
+
+/* Quick info badges row */
+.about-info-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.about-info-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  padding: 5px 14px;
+  border-radius: 8px;
+  color: var(--color-text);
+  opacity: 0.85;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.about-info-bio {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--color-text-muted);
+}
+
+/* ============================================================
+   Shared Section Styles
+   ============================================================ */
+.about-section {
+  margin-bottom: 60px;
+}
+
+.about-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+
+
+/* ============================================================
+   Achievements Grid
+   ============================================================ */
+.about-achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.about-achievement-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 22px;
+  border-radius: 14px;
+
+  /* Glassmorphism */
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+
+  transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.about-achievement-card:hover {
+  transform: translateY(-4px);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+:root.light-mode .about-achievement-card:hover {
+  background-color: rgba(15, 23, 42, 0.08);
+}
+
+.about-achievement-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.about-achievement-text {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--color-text);
+  opacity: 0.85;
+}
+
+/* ============================================================
+   Contact Section (Reach Out To Me)
+   ============================================================ */
+.about-contact-section {
+  margin-bottom: 0;
+}
+
+.about-contact-subtitle {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 1.02rem;
+  margin-bottom: 40px;
+}
+
+/* Two columns: Info on left, Form on right */
+.about-contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 32px;
+  align-items: start;
+}
+
+/* Base style for both info and form cards */
+.about-contact-info-card,
+.about-contact-form-card {
+  padding: 36px 32px;
+  border-radius: 20px;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.contact-info-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 12px;
+}
+
+.contact-info-card-desc {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  margin-bottom: 28px;
+}
+
+/* Contact Info Details list styling */
+.contact-info-details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.contact-info-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Icon style */
+.contact-info-detail-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+/* Text style */
+.contact-info-detail-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.contact-info-detail-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--color-text-muted);
+  opacity: 0.7;
+}
+
+.contact-info-detail-val {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text);
+  transition: color 0.3s ease;
+}
+
+.link-hover:hover {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+/* ============================================================
+   Fade-In Animation
+   ============================================================ */
+.about-page .fade-in-section {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: section-fade-in 0.8s ease forwards;
+}
+
+.about-page .fade-in-section:nth-child(1) { animation-delay: 0.1s; }
+.about-page .fade-in-section:nth-child(2) { animation-delay: 0.25s; }
+.about-page .fade-in-section:nth-child(3) { animation-delay: 0.4s; }
+.about-page .fade-in-section:nth-child(4) { animation-delay: 0.55s; }
+.about-page .fade-in-section:nth-child(5) { animation-delay: 0.7s; }
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 768px) {
+  .about-page-title {
+    font-size: 2rem;
+  }
+
+  .about-section-title {
+    font-size: 1.5rem;
+  }
+
+  .about-info-card {
+    padding: 28px 22px;
+  }
+
+  /* Stack contact columns vertically on tablet/mobile */
+  .about-contact-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .about-contact-info-card,
+  .about-contact-form-card {
+    padding: 28px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-page {
+    padding: 110px 16px 80px;
+  }
+
+  .about-achievements-grid {
+    grid-template-columns: 1fr;
+  }
+}

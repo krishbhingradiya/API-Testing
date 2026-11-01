@@ -9,10 +9,12 @@ on:
       - main
 
 jobs:
-  test:
-    name: Run Automated Tests
+  test-api:
+    name: Run API-Testing Automated Tests
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: API-Testing-Project
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
@@ -22,9 +24,36 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+          cache-dependency-path: API-Testing-Project/package-lock.json
 
       - name: Install Dependencies
         run: npm install
 
       - name: Execute Automated Test Suite (Jest & Supertest)
         run: npm test
+
+  test-portfolio:
+    name: Build & Lint Portfolio-Web
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Portfolio-Web
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20 LTS Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: Portfolio-Web/package-lock.json
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Linter (Oxlint)
+        run: npm run lint
+
+      - name: Build Production Bundle (Vite)
+        run: npm run build

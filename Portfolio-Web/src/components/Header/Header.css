@@ -1,0 +1,199 @@
+/* ============================================================
+   Header Styles
+   ============================================================
+   - Glassmorphism (semi-transparent backdrop blur) for a modern look
+   - Sticky positioning so the header stays at the top while scrolling
+   - Responsive: hamburger menu appears on screens < 768px
+   - Uses CSS variables for light/dark mode support
+   ============================================================ */
+
+/* ===== Main Navbar Bar ===== */
+.navbar {
+  /* Stick to the top of the viewport */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+
+  /* Glassmorphism effect using design tokens */
+  background: var(--color-navbar-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  /* Subtle bottom border for separation */
+  border-bottom: 1px solid var(--color-navbar-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ===== Inner Container ===== */
+/* Constrains content width and adds horizontal padding */
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 72px;
+
+  /* Flexbox: logo on the left, controls on the right */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ===== Logo ===== */
+.navbar-logo {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-decoration: none;
+
+  /* Gradient text effect */
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  transition: opacity 0.3s ease;
+}
+
+.navbar-logo:hover {
+  opacity: 0.85;
+}
+
+/* ===== Navbar Right Controls wrapper ===== */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ===== Navigation Menu (Desktop) ===== */
+.navbar-menu {
+  /* Reset list defaults */
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  /* Horizontal layout for desktop */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ===== Individual Nav Item ===== */
+.navbar-item {
+  list-style: none;
+}
+
+/* ===== Nav Link ===== */
+.navbar-link {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 8px 18px;
+  border-radius: 8px;
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+/* Hover state: subtle background highlight */
+.navbar-link:hover {
+  color: var(--color-text);
+  background-color: var(--color-card-bg);
+}
+
+/* Active link: gradient background to indicate the current page */
+.navbar-link-active {
+  color: var(--color-text);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15)) !important;
+}
+
+/* ===== Theme Toggle Button ===== */
+.theme-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--color-card-bg);
+  transform: scale(1.05);
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+/* ===== Hamburger Toggle Button (hidden on desktop) ===== */
+.navbar-toggle {
+  display: none; /* Hidden by default on large screens */
+  background: none;
+  border: none;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.navbar-toggle:hover {
+  background-color: var(--color-card-bg);
+}
+
+/* ============================================================
+   Responsive Styles – screens narrower than 768px
+   ============================================================ */
+@media (max-width: 768px) {
+  /* Show the hamburger button on mobile */
+  .navbar-toggle {
+    display: flex;
+  }
+
+  /* Mobile menu: slides down from behind the navbar */
+  .navbar-menu {
+    /* Hidden by default */
+    position: absolute;
+    top: 72px; /* Right below the navbar */
+    left: 0;
+    width: 100%;
+
+    /* Stack links vertically */
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px 24px;
+
+    /* Glassmorphism background matching the navbar background */
+    background: var(--color-background);
+    border-bottom: 1px solid var(--color-navbar-border);
+
+    /* Hidden state: translate up and invisible */
+    transform: translateY(-20px);
+    opacity: 0;
+    visibility: hidden;
+    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+  }
+
+  /* When the "active" class is added, reveal the menu */
+  .navbar-menu.active {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Make links full-width on mobile for easier tapping */
+  .navbar-link {
+    display: block;
+    width: 100%;
+    padding: 12px 18px;
+    font-size: 1rem;
+  }
+}

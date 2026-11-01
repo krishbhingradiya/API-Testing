@@ -1,0 +1,282 @@
+/* ============================================================
+   Projects Page Styles
+   ============================================================
+   - Page layout, heading, and card grid
+   - GitHub Repos section with search input and repo grid
+   - Fade-in animations
+   - Responsive: single column on mobile
+   ============================================================ */
+
+/* ===== Page Wrapper ===== */
+.projects-page {
+  /* Top padding accounts for the fixed navbar */
+  padding: 120px 24px 100px;
+  min-height: 100vh;
+}
+
+/* ===== Inner Container ===== */
+.projects-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ===== Page Title ===== */
+.projects-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+/* ===== Subtitle ===== */
+.projects-subtitle {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+  max-width: 580px;
+  margin: 0 auto 56px;
+  line-height: 1.6;
+}
+
+/* ===== Projects Grid ===== */
+/* Two columns on desktop, one on mobile */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+}
+
+/* ===== Fade-in Animation ===== */
+.projects-page .fade-in-section {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: section-fade-in 0.8s ease forwards;
+}
+
+.projects-page .projects-title { animation-delay: 0.1s; }
+.projects-page .projects-subtitle { animation-delay: 0.2s; }
+
+/* Stagger the project cards */
+.projects-grid .project-card:nth-child(1) {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: section-fade-in 0.8s ease 0.3s forwards;
+}
+
+.projects-grid .project-card:nth-child(2) {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: section-fade-in 0.8s ease 0.45s forwards;
+}
+
+.projects-grid .project-card:nth-child(3) {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: section-fade-in 0.8s ease 0.6s forwards;
+}
+
+.projects-grid .project-card:nth-child(4) {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: section-fade-in 0.8s ease 0.75s forwards;
+}
+
+/* ============================================================
+   GitHub Repositories Section (Practical 3)
+   ============================================================ */
+
+/* ===== Section Title ===== */
+.repos-section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: center;
+  margin-top: 80px;
+  margin-bottom: 10px;
+}
+
+/* ===== Section Subtitle ===== */
+.repos-section-subtitle {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  max-width: 500px;
+  margin: 0 auto 36px;
+  line-height: 1.6;
+}
+
+/* ===== Search & Controls Bar ===== */
+.repos-controls-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 960px;
+  margin: 0 auto 36px;
+}
+
+.repos-search-wrapper {
+  flex: 1;
+  min-width: 280px;
+}
+
+.repos-search-input {
+  width: 100%;
+  padding: 13px 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-card-border);
+  background: var(--color-card-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  font-family: var(--font-family);
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.repos-search-input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.6;
+}
+
+.repos-search-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* ===== Control Action Buttons ===== */
+.repos-action-btns {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.repos-control-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: var(--font-family);
+  cursor: pointer;
+  border: 1px solid var(--color-card-border);
+  background: var(--color-card-bg);
+  color: var(--color-text);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.25s ease;
+}
+
+.repos-control-btn .btn-icon {
+  font-size: 1rem;
+}
+
+.repos-control-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.repos-control-btn:active {
+  transform: translateY(0);
+}
+
+/* Simulated Fail Button specific styling */
+.repos-fail-btn {
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.repos-fail-btn:hover {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.25);
+}
+
+.repos-fail-btn.active {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+}
+
+/* Reload Button specific styling */
+.repos-reload-btn {
+  border-color: rgba(59, 130, 246, 0.3);
+  color: var(--color-primary);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.repos-reload-btn:hover {
+  border-color: var(--color-primary);
+  background: rgba(59, 130, 246, 0.15);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
+}
+
+/* ===== Repos Grid ===== */
+.repos-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+/* Stagger repo card fade-in */
+.repos-grid .repo-card {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: section-fade-in 0.5s ease forwards;
+}
+
+.repos-grid .repo-card:nth-child(1) { animation-delay: 0.05s; }
+.repos-grid .repo-card:nth-child(2) { animation-delay: 0.1s; }
+.repos-grid .repo-card:nth-child(3) { animation-delay: 0.15s; }
+.repos-grid .repo-card:nth-child(4) { animation-delay: 0.2s; }
+.repos-grid .repo-card:nth-child(5) { animation-delay: 0.25s; }
+.repos-grid .repo-card:nth-child(6) { animation-delay: 0.3s; }
+.repos-grid .repo-card:nth-child(n+7) { animation-delay: 0.35s; }
+
+/* ===== No Results Message ===== */
+.repos-no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  padding: 40px 20px;
+  font-style: italic;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 900px) {
+  .projects-grid {
+    grid-template-columns: 1fr;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  .repos-grid {
+    grid-template-columns: 1fr;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .projects-title {
+    font-size: 2rem;
+  }
+
+  .repos-section-title {
+    font-size: 1.6rem;
+  }
+
+  .projects-page {
+    padding: 110px 16px 80px;
+  }
+}

@@ -1,0 +1,66 @@
+/* ============================================================
+   Footer Styles
+   ============================================================
+   - Centered layout with social icons, tagline, and copyright
+   - Top border for visual separation
+   - Hover effects on social icons using design variables
+   ============================================================ */
+
+/* ===== Footer Wrapper ===== */
+.footer {
+  padding: 40px 24px;
+  border-top: 1px solid var(--color-navbar-border);
+  background-color: var(--color-card-bg);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ===== Inner Container ===== */
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* ===== Social Links Row ===== */
+.footer-socials {
+  display: flex;
+  gap: 16px;
+}
+
+.footer-social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  color: var(--color-text-muted);
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  text-decoration: none;
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+
+.footer-social-link:hover {
+  color: var(--color-text);
+  background-color: rgba(59, 130, 246, 0.15);
+  border-color: var(--color-primary);
+  transform: translateY(-3px);
+}
+
+/* ===== Tagline ===== */
+.footer-tagline {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+/* ===== Copyright ===== */
+.footer-copyright {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  opacity: 0.8;
+}

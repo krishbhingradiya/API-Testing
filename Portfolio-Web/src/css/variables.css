@@ -1,0 +1,51 @@
+/* ============================================================
+   CSS Variables (Design Tokens)
+   ============================================================
+   - Centralised colour and spacing values used across the app.
+   - Changing a value here updates it everywhere automatically.
+   - Supports light-mode class override for dark/light theme toggle.
+   ============================================================ */
+
+:root {
+  /* ---- Common Design Tokens ---- */
+  --font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, sans-serif;
+
+  /* ---- Border Radius ---- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  /* ---- Layout ---- */
+  --max-width: 1200px;
+  --navbar-height: 72px;
+
+  /* ---- Colours (Dark Theme - Default) ---- */
+  --color-background: #0f172a;          /* Dark navy background */
+  --color-primary: #3b82f6;             /* Blue */
+  --color-secondary: #8b5cf6;           /* Purple */
+  --color-accent: #06b6d4;              /* Cyan */
+  --color-text: #ffffff;                /* White text */
+  --color-text-muted: rgba(255, 255, 255, 0.6);
+  --color-card-bg: rgba(255, 255, 255, 0.04);
+  --color-card-border: rgba(255, 255, 255, 0.08);
+
+  --color-navbar-bg: rgba(15, 23, 42, 0.85);
+  --color-navbar-border: rgba(255, 255, 255, 0.06);
+}
+
+/* ---- Colours (Light Theme Override) ---- */
+:root.light-mode {
+  --color-background: #f8fafc;          /* Light slate grey background */
+  --color-primary: #2563eb;             /* Deeper Blue for readability */
+  --color-secondary: #7c3aed;           /* Deeper Purple for readability */
+  --color-accent: #0891b2;              /* Deeper Cyan */
+  --color-text: #0f172a;                /* Dark slate text */
+  --color-text-muted: rgba(15, 23, 42, 0.6);
+  --color-card-bg: rgba(15, 23, 42, 0.03);
+  --color-card-border: rgba(15, 23, 42, 0.08);
+
+  --color-navbar-bg: rgba(248, 250, 252, 0.85);
+  --color-navbar-border: rgba(15, 23, 42, 0.06);
+}

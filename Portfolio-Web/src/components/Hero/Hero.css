@@ -1,0 +1,338 @@
+/* ============================================================
+   Hero Styles
+   ============================================================
+   - Two-column layout: text on left, image on right
+   - Animated floating gradient orbs (pure CSS keyframes)
+   - Glowing ring around the profile image
+   - Fade-in entrance animation for each content block
+   - Fully responsive (stacks vertically on mobile)
+   - Supports light/dark mode design tokens
+   ============================================================ */
+
+/* ===== Section Wrapper ===== */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+
+  /* Extra top padding to account for the fixed navbar (72px) */
+  padding: 120px 24px 80px;
+}
+
+/* ===== Animated Background ===== */
+/* Container for the floating gradient orbs */
+.hero-bg-animation {
+  position: absolute;
+  inset: 0;               /* Fills the entire hero section */
+  pointer-events: none;    /* Clicks pass through to content */
+  z-index: 0;
+}
+
+/* Shared styles for all three orbs */
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);      /* Heavy blur creates a soft glow */
+  opacity: 0.3;
+}
+
+:root.light-mode .hero-orb {
+  opacity: 0.15;          /* Softer glow in light mode */
+}
+
+/* Orb 1 – blue, top-left area */
+.hero-orb-1 {
+  width: 400px;
+  height: 400px;
+  background: #3b82f6;
+  top: -100px;
+  left: -100px;
+  animation: float-orb 8s ease-in-out infinite;
+}
+
+/* Orb 2 – purple, bottom-right area */
+.hero-orb-2 {
+  width: 350px;
+  height: 350px;
+  background: #8b5cf6;
+  bottom: -80px;
+  right: -80px;
+  animation: float-orb 10s ease-in-out infinite reverse;
+}
+
+/* Orb 3 – cyan, center area */
+.hero-orb-3 {
+  width: 250px;
+  height: 250px;
+  background: #06b6d4;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: float-orb 12s ease-in-out infinite;
+}
+
+/* Floating animation – gentle up/down drift */
+@keyframes float-orb {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-40px);
+  }
+}
+
+/* ===== Content Container ===== */
+.hero-container {
+  position: relative;
+  z-index: 1;              /* Sits above the background orbs */
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+
+  /* Two-column layout */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 60px;
+}
+
+/* ===== Left Column: Text Content ===== */
+.hero-content {
+  flex: 1;
+  max-width: 600px;
+}
+
+/* Small greeting text ("Hello, I'm") */
+.hero-greeting {
+  font-size: 1.1rem;
+  color: var(--color-accent); /* Accent cyan colour */
+  font-weight: 600;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+:root.light-mode .hero-greeting {
+  color: var(--color-primary); /* Deeper blue accent in light mode for readability */
+}
+
+/* Main name heading */
+.hero-name {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: 1.15;
+  margin-bottom: 20px;
+}
+
+/* Last name gets a gradient treatment */
+.hero-name-highlight {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ===== Role Badges ===== */
+.hero-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.hero-role-badge {
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 20px;
+  color: var(--color-text);
+  opacity: 0.9;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ===== Introduction Paragraph ===== */
+.hero-intro {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--color-text-muted);
+  margin-bottom: 32px;
+  max-width: 520px;
+}
+
+/* ===== CTA Buttons ===== */
+.hero-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* Shared button base */
+.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* Hover lift effect */
+.hero-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* Primary button – gradient background */
+.hero-btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: #ffffff;
+  border: none;
+}
+
+.hero-btn-primary:hover {
+  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.35);
+}
+
+/* Secondary button – outlined / glass style */
+.hero-btn-secondary {
+  background: var(--color-card-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-card-border);
+}
+
+.hero-btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.2);
+}
+
+:root.light-mode .hero-btn-secondary:hover {
+  background-color: rgba(15, 23, 42, 0.08);
+}
+
+/* ===== Right Column: Profile Image ===== */
+.hero-image-wrapper {
+  position: relative;
+  flex-shrink: 0;
+  width: 340px;
+  height: 340px;
+}
+
+/* Glowing ring behind the image */
+.hero-image-glow {
+  position: absolute;
+  inset: -15px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
+  opacity: 0.4;
+  filter: blur(30px);
+  animation: glow-pulse 4s ease-in-out infinite;
+}
+
+:root.light-mode .hero-image-glow {
+  opacity: 0.25;          /* Softer profile ring glow in light mode */
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.05);
+  }
+}
+
+/* Profile photo */
+.hero-image {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid var(--color-card-border);
+  z-index: 1;
+}
+
+/* ===== Fade-In Entrance Animation ===== */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fade-in-up 0.8s ease forwards;
+}
+
+/* Stagger the animations so elements appear one after another */
+.hero-greeting.fade-in    { animation-delay: 0.1s; }
+.hero-name.fade-in        { animation-delay: 0.2s; }
+.hero-roles.fade-in       { animation-delay: 0.35s; }
+.hero-intro.fade-in       { animation-delay: 0.5s; }
+.hero-buttons.fade-in     { animation-delay: 0.65s; }
+.hero-image-wrapper.fade-in { animation-delay: 0.4s; }
+
+@keyframes fade-in-up {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   Responsive – Tablet & Mobile (< 768px)
+   ============================================================ */
+@media (max-width: 768px) {
+  .hero {
+    padding: 110px 20px 60px;
+  }
+
+  /* Stack columns vertically; image on top */
+  .hero-container {
+    flex-direction: column-reverse;
+    text-align: center;
+    gap: 40px;
+  }
+
+  .hero-content {
+    max-width: 100%;
+  }
+
+  .hero-name {
+    font-size: 2.4rem;
+  }
+
+  .hero-roles {
+    justify-content: center;
+  }
+
+  .hero-intro {
+    max-width: 100%;
+  }
+
+  .hero-buttons {
+    justify-content: center;
+  }
+
+  /* Smaller image on mobile */
+  .hero-image-wrapper {
+    width: 240px;
+    height: 240px;
+  }
+}
+
+/* ===== Extra-small screens (< 480px) ===== */
+@media (max-width: 480px) {
+  .hero-name {
+    font-size: 2rem;
+  }
+
+  .hero-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

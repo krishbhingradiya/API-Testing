@@ -1,0 +1,99 @@
+/* ============================================================
+   NotFound Page Styles
+   ============================================================
+   - Centers content and uses glassmorphic panel styling
+   - Accent warning icon drop shadow
+   - Gradient error code digits and animated CTA link
+   ============================================================ */
+
+.not-found-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 120px 24px 100px;
+}
+
+.not-found-container {
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  padding: 48px 32px;
+  border-radius: 20px;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.not-found-icon-wrap {
+  margin-bottom: 20px;
+  color: #eab308; /* Amber alert yellow */
+}
+
+.not-found-icon {
+  filter: drop-shadow(0 0 10px rgba(234, 179, 8, 0.25));
+}
+
+.not-found-code {
+  font-size: 6rem;
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(135deg, #eab308, #ef4444);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
+}
+
+.not-found-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 16px;
+}
+
+.not-found-desc {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  margin-bottom: 32px;
+}
+
+.not-found-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.not-found-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.35);
+}
+
+.not-found-btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+  .not-found-container {
+    padding: 32px 20px;
+  }
+
+  .not-found-code {
+    font-size: 4.5rem;
+  }
+
+  .not-found-title {
+    font-size: 1.5rem;
+  }
+}

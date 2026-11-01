@@ -1,0 +1,170 @@
+/* ============================================================
+   ContactForm Styles
+   ============================================================
+   - Glassmorphism form inputs using design tokens
+   - Live character counter warning state styles
+   - Dotted-border live preview layout
+   - Gradient submit button
+   ============================================================ */
+
+/* ===== Form Container ===== */
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ===== Form Group (label + input) ===== */
+.contact-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ===== Labels ===== */
+.contact-form-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+/* ===== Inputs & Textarea ===== */
+.contact-form-input {
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: var(--color-text);
+
+  /* Glassmorphism field background */
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+
+  /* Focus transition */
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+/* Placeholder colour */
+.contact-form-input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.5;
+}
+
+/* Focus state: blue border glow */
+.contact-form-input:focus {
+  border-color: var(--color-primary);
+  background-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.contact-form-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* ===== Form Header Row (label + char count) ===== */
+.contact-form-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.contact-form-char-count {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.contact-form-char-count.warning {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* ===== Live Preview Card ===== */
+.contact-live-preview {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.preview-tag {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--color-primary);
+}
+
+.preview-card {
+  padding: 20px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed var(--color-card-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-bottom: 1px solid var(--color-card-border);
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+
+.preview-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.preview-email {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.preview-body {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.preview-message {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* ===== Submit Button ===== */
+.contact-form-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #ffffff;
+
+  /* Gradient background */
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+
+  /* Hover transition */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.contact-form-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.35);
+}
+
+.contact-form-btn:active {
+  transform: translateY(0);
+}
